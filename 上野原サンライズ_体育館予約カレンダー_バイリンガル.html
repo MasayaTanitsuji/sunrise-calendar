@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>上野原サンライズ 体育館予約カレンダー</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0b0f18;
+  --surf:     #131929;
+  --surf2:    #1a2235;
+  --surf3:    #1f2a40;
+  --border:   #263047;
+  --border2:  #1e2a3a;
+  --text:     #e2eaf6;
+  --sub:      #7a8fa8;
+  --muted:    #3d5068;
+  --gold:     #f0c040;
+  --gold2:    #b8922c;
+  --gold-dim: rgba(240,192,64,.12);
+  --fac-a-bg: #2d1414; --fac-a-fg: #ff8a80; --fac-a-bd: #ff4444;
+  --fac-b-bg: #142d18; --fac-b-fg: #69f0ae; --fac-b-bd: #2ec94a;
+  --fac-c-bg: #2d2a10; --fac-c-fg: #ffd740; --fac-c-bd: #e6be00;
+  --fac-d-bg: #2d1120; --fac-d-fg: #ff6090; --fac-d-bd: #e0437a;
+  --fac-e-bg: #0e1e35; --fac-e-fg: #82b1ff; --fac-e-bd: #339af0;
+  --fac-f-bg: #1a1e24; --fac-f-fg: #9e9e9e; --fac-f-bd: #6c757d;
+  --am-bg: #0e1929; --am-fg: #74c0fc;
+  --pm-bg: #0e2115; --pm-fg: #69db7c;
+  --eve-bg:#291510; --eve-fg:#ff8787;
+  --sun-bg: #1e0f0f; --sun-hd: #3d1515;
+  --sat-bg: #0f1525; --sat-hd: #152035;
+  --out-bg: #0a0d14;
+  --r: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+header { background: linear-gradient(180deg,#0f1520,var(--bg)); border-bottom: 1px solid var(--border); padding: 13px 20px; position: sticky; top: 0; z-index: 50; }
+.hdr { max-width: 1480px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 9px; }
+.brand-icon { width: 32px; height: 32px; border-radius: 7px; background: linear-gradient(135deg,var(--gold),var(--gold2)); display: grid; place-items: center; font-size: 16px; flex-shrink: 0; }
+.brand strong { font-size: 13px; font-weight: 700; color: var(--gold); }
+.brand small  { display: block; font-size: 10px; color: var(--sub); }
+.badge { padding: 2px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: .06em; border: 1px solid; }
+.badge.edit { background: var(--gold-dim); color: var(--gold); border-color: var(--gold2); }
+.badge.view { background: rgba(116,192,252,.08); color: #74c0fc; border-color: #1e5a8a; }
+.nav-row { display: flex; align-items: center; gap: 7px; margin-left: auto; flex-wrap: wrap; }
+.mnav { display: flex; align-items: center; background: var(--surf2); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.mnav button { background: none; border: none; color: var(--text); cursor: pointer; padding: 5px 11px; font-size: 14px; transition: background .12s; }
+.mnav button:hover { background: var(--border); }
+.mlbl { padding: 5px 13px; font-size: 12px; font-weight: 700; font-family: 'DM Mono',monospace; color: var(--gold); min-width: 105px; text-align: center; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+.btn-s { background: var(--surf2); border: 1px solid var(--border); color: var(--sub); padding: 5px 11px; border-radius: var(--r); font-size: 11px; cursor: pointer; font-family: 'Noto Sans JP',sans-serif; transition: all .12s; }
+.btn-s:hover { border-color: var(--gold2); color: var(--gold); }
+.sync-row { font-size: 10px; color: var(--sub); display: flex; align-items: center; gap: 4px; }
+.sdot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.sdot.ok  { background: #51cf66; }
+.sdot.busy{ background: var(--gold); animation: blink .8s infinite; }
+.sdot.err { background: #ff6b6b; }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* LANG SWITCH */
+.lang-switch { display: flex; background: var(--surf3); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.lang-btn { background: none; border: none; color: var(--sub); padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: .06em; transition: all .12s; font-family: 'Noto Sans JP',sans-serif; }
+.lang-btn.active { background: var(--gold); color: #0b0f18; }
+.lang-btn:not(.active):hover { color: var(--text); }
+
+/* SHARE PANEL */
+.share-panel { max-width: 1480px; margin: 0 auto; padding: 8px 20px; display: none; gap: 8px; flex-wrap: wrap; }
+.share-panel.show { display: flex; }
+.share-box { flex: 1; min-width: 180px; background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 13px; }
+.share-box label { font-size: 9px; color: var(--sub); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+.share-url { font-size: 10px; font-family: 'DM Mono',monospace; color: var(--text); background: var(--surf2); border: 1px solid var(--border2); border-radius: 4px; padding: 3px 7px; word-break: break-all; margin-bottom: 6px; }
+
+/* LEGEND */
+.legend-bar { max-width: 1480px; margin: 0 auto; padding: 8px 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.leg-lbl { font-size: 9px; color: var(--muted); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.leg-grp { display: flex; gap: 5px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 500; border: 1px solid transparent; }
+.chip .dot { width: 5px; height: 5px; border-radius: 50%; }
+.divv { width: 1px; height: 16px; background: var(--border); }
+
+/* CALENDAR */
+.cal-header-outer { position: sticky; top: 56px; z-index: 40; padding: 0 20px; overflow-x: hidden; pointer-events: none; }
+.cal-header-inner { min-width: 1680px; pointer-events: auto; }
+.cal-header { display: grid; grid-template-columns: repeat(7, minmax(240px, 1fr)); border: 1px solid var(--border); border-bottom: none; border-radius: 10px 10px 0 0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+.cal-wrap { max-width: 100%; margin: 0 auto; padding: 0 20px 40px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.cal-wrap::-webkit-scrollbar { height: 8px; }
+.cal-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.cal-scroll { min-width: 1680px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(240px, 1fr)); border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; overflow: hidden; box-shadow: 0 6px 32px rgba(0,0,0,.45); }
+.dow-hdr { padding: 11px; text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .08em; background: var(--surf); border-right: 1px solid var(--border); color: var(--sub); }
+.dow-hdr:last-child { border-right: none; }
+.dow-hdr.sun { background: var(--sun-hd); color: #ff8787; }
+.dow-hdr.sat { background: var(--sat-hd); color: #74c0fc; }
+.day { border-right: 1px solid var(--border2); border-bottom: 1px solid var(--border2); display: flex; flex-direction: column; min-height: 150px; background: var(--surf); }
+.day:nth-child(7n) { border-right: none; }
+.day.out  { background: var(--out-bg); }
+.day.is-sun { background: var(--sun-bg); }
+.day.is-sat { background: var(--sat-bg); }
+.day.is-off { background: #12101a !important; }
+.day.is-off .dnum { color: var(--muted) !important; }
+.sched-badge { font-size: 9px; font-weight: 700; letter-spacing: .04em; padding: 1px 6px; border-radius: 10px; white-space: nowrap; }
+.sched-badge.off    { background: rgba(255,100,100,.12); color: #ff6b6b; border: 1px solid rgba(255,100,100,.2); }
+.sched-badge.yamanashi { background: rgba(240,192,64,.12); color: var(--gold); border: 1px solid rgba(240,192,64,.2); }
+.sched-badge.tokyo  { background: rgba(130,177,255,.12); color: #82b1ff; border: 1px solid rgba(130,177,255,.2); }
+.date-hdr { display: flex; align-items: center; padding: 4px 5px 3px; border-bottom: 1px solid var(--border2); min-height: 26px; gap: 4px; }
+.date-hdr-left  { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.date-hdr-right { display: flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; overflow: hidden; }
+.dnum { font-size: 13px; font-weight: 700; font-family: 'DM Mono',monospace; color: var(--sub); width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; }
+.day.is-today .dnum { background: var(--gold); color: #0b0f18; }
+.day.is-sun .dnum { color: #ff8787; }
+.day.is-sat .dnum { color: #74c0fc; }
+.day.out .dnum { color: var(--muted); }
+.note-prev { font-size: 9px; color: var(--sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; opacity: .7; }
+.att-count-badge { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 10px; white-space: nowrap; background: rgba(81,207,102,.12); color: #69db7c; border: 1px solid rgba(81,207,102,.25); flex-shrink: 0; }
+.slots { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 3px 5px 4px; }
+.slot-row { display: flex; gap: 3px; min-height: 24px; }
+.slbl { font-size: 10px; font-weight: 700; flex-shrink: 0; display: grid; place-items: center; border-radius: 3px; padding: 2px 5px; min-width: 28px; }
+.slbl.am  { background: var(--am-bg);  color: var(--am-fg); }
+.slbl.pm  { background: var(--pm-bg);  color: var(--pm-fg); }
+.slbl.eve { background: var(--eve-bg); color: var(--eve-fg); }
+.sbody { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.rchip { display: flex; align-items: center; padding: 3px 6px; border-radius: 3px; font-size: 11px; font-weight: 500; border-left: 2px solid transparent; position: relative; overflow: hidden; cursor: default; }
+.rchip:hover { opacity: .85; }
+.rchip-txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; max-width: calc(100% - 14px); }
+.rchip .dx { display: none; position: absolute; right: 2px; background: rgba(0,0,0,.3); border: none; cursor: pointer; width: 13px; height: 13px; border-radius: 50%; font-size: 9px; line-height: 13px; text-align: center; padding: 0; color: inherit; }
+.rchip:hover .dx { display: block; }
+.att-row { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 2px; }
+.att-tag { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: rgba(81,207,102,.12); color: #69db7c; border: 1px solid rgba(81,207,102,.22); display: flex; align-items: center; gap: 3px; }
+.att-tag .rm { background: none; border: none; color: inherit; cursor: pointer; font-size: 9px; opacity: .6; padding: 0; }
+.att-tag .rm:hover { opacity: 1; }
+.att-btn { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: rgba(81,207,102,.06); color: var(--sub); border: 1px dashed rgba(81,207,102,.2); cursor: pointer; transition: all .12s; font-family: 'Noto Sans JP',sans-serif; }
+.att-btn:hover,.att-btn.has { border-style: solid; background: rgba(81,207,102,.15); color: #69db7c; border-color: rgba(81,207,102,.4); }
+.add-btn { width: 100%; background: none; border: 1px dashed var(--border); border-radius: 3px; color: var(--muted); font-size: 11px; padding: 3px 4px; cursor: pointer; transition: all .12s; font-family: 'Noto Sans JP',sans-serif; min-height: 20px; }
+.add-btn:hover { border-color: var(--gold2); color: var(--gold); background: var(--gold-dim); }
+.day.out .add-btn, .view-mode .add-btn, .view-mode .dx, .view-mode .rm { display: none !important; }
+.view-mode textarea { pointer-events: none; }
+.note-wrap { padding: 2px 4px 3px; }
+textarea.note-inp { width: 100%; background: none; border: none; border-top: 1px dashed var(--border2); color: var(--sub); font-size: 8px; font-family: 'Noto Sans JP',sans-serif; padding: 2px 0 0; outline: none; resize: none; line-height: 1.4; }
+textarea.note-inp::placeholder { color: var(--muted); }
+textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
+
+/* MODAL */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 200; align-items: flex-start; justify-content: center; overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(5px); padding: 20px 16px 40px; }
+.overlay.open { display: flex; }
+.modal { background: var(--surf2); border: 1px solid var(--border); border-radius: 12px; padding: 22px; width: 350px; max-width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.65); animation: mIn .16s ease; margin: auto; }
+@keyframes mIn{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
+.modal h3 { font-size: 13px; font-weight: 700; color: var(--gold); margin-bottom: 16px; }
+.modal h3 small { font-weight: 300; color: var(--sub); font-size: 11px; margin-left: 6px; }
+.fg { margin-bottom: 12px; }
+.fg label { display: block; font-size: 10px; font-weight: 700; color: var(--sub); margin-bottom: 4px; letter-spacing: .06em; text-transform: uppercase; }
+.fg select, .fg input[type=text] { width: 100%; background: var(--surf3); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 8px 10px; font-size: 13px; font-family: 'Noto Sans JP',sans-serif; outline: none; transition: border-color .12s; -webkit-appearance: none; appearance: none; }
+.fg select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a8fa8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+.fg select:focus, .fg input:focus { border-color: var(--gold2); }
+.fac-bar { height: 3px; border-radius: 2px; margin-top: 5px; transition: background .2s; }
+.mfoot { display: flex; gap: 8px; margin-top: 18px; }
+.mfoot .btn-cancel { flex: 1; background: none; border: 1px solid var(--border); color: var(--sub); padding: 9px; border-radius: 7px; cursor: pointer; font-size: 12px; font-family: 'Noto Sans JP',sans-serif; transition: all .12s; }
+.mfoot .btn-cancel:hover { border-color: var(--sub); color: var(--text); }
+.mfoot .btn-save { flex: 2; background: var(--gold); border: none; color: #0b0f18; padding: 9px; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP',sans-serif; transition: all .12s; }
+.mfoot .btn-save:hover { background: #f5d060; }
+.mfoot .btn-join { flex: 2; background: #1e7a33; border: none; color: #fff; padding: 9px; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP',sans-serif; transition: all .12s; }
+.mfoot .btn-join:hover { background: #25a144; }
+.toast { position: fixed; bottom: 22px; right: 22px; background: #1e7a33; color: #fff; padding: 9px 15px; border-radius: 8px; font-size: 12px; z-index: 300; opacity: 0; transform: translateY(8px); transition: all .22s; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr">
+    <div class="brand">
+      <div class="brand-icon">🏀</div>
+      <div>
+        <strong id="t-brand">上野原サンライズ</strong>
+        <small id="t-subtitle">体育館予約カレンダー</small>
+      </div>
+    </div>
+    <span class="badge view" id="modeBadge">👁 閲覧モード</span>
+    <div class="nav-row">
+      <div class="sync-row"><span class="sdot ok" id="sdot"></span><span id="stxt">Ready</span></div>
+      <div class="mnav">
+        <button onclick="changeMonth(-1)">←</button>
+        <div class="mlbl" id="mlbl">—</div>
+        <button onclick="changeMonth(1)">→</button>
+      </div>
+      <button class="btn-s" id="t-today" onclick="goToday()">今月</button>
+      <button class="btn-s" id="t-share-btn" onclick="toggleShare()">🔗 共有</button>
+      <button class="btn-s" id="editBtn" onclick="openEditModal()">✏️ 編集モード</button>
+      <!-- Language switch -->
+      <div class="lang-switch">
+        <button class="lang-btn active" id="btnJA" onclick="setLang('ja')">JA</button>
+        <button class="lang-btn"        id="btnEN" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Share panel -->
+<div class="share-panel" id="sharePanel">
+  <div class="share-box">
+    <label id="t-view-url-lbl">閲覧URL（選手・一般向け）</label>
+    <div class="share-url" id="viewUrl">このページのURLをそのままシェアしてください</div>
+    <button class="btn-s" onclick="copyUrl('view')" id="t-copy-view">コピー</button>
+  </div>
+  <div class="share-box" id="editShareBox" style="display:none">
+    <label id="t-edit-url-lbl">編集URL（管理者専用）</label>
+    <div class="share-url" id="editUrl">—</div>
+    <button class="btn-s" onclick="copyUrl('edit')" id="t-copy-edit">コピー</button>
+  </div>
+</div>
+
+<!-- Legend -->
+
+
+<!-- Calendar sticky header (outside scroll container) -->
+<div class="cal-header-outer" id="calHeaderOuter">
+  <div class="cal-header-inner" id="calHeaderInner">
+    <div class="cal-header" id="calHeader"></div>
+  </div>
+</div>
+<!-- Calendar body -->
+<div class="cal-wrap" id="calWrap">
+  <div class="cal-scroll">
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+</div>
+
+<!-- Reservation modal -->
+<div class="overlay" id="resOv" onclick="ovClose(event,'resOv')">
+  <div class="modal">
+    <h3 id="t-res-title">予約を追加 <small id="resLbl"></small></h3>
+    <div class="fg"><label id="t-fac-lbl">施設</label>
+      <select id="facSel" onchange="updateBar()"><option value="" id="t-fac-ph">選択してください</option></select>
+      <div class="fac-bar" id="facBar"></div>
+    </div>
+    <div class="fg"><label id="t-pur-lbl">用途</label>
+      <select id="purSel">
+        <option id="t-pur-practice">チーム練習</option>
+        <option id="t-pur-solo">個人練習</option>
+        <option id="t-pur-match">試合</option>
+        <option id="t-pur-event">イベント</option>
+        <option id="t-pur-other">その他</option>
+      </select>
+    </div>
+    <div class="fg"><label id="t-slot-lbl">時間帯</label>
+      <select id="slotSel">
+        <option value="am" id="t-slot-am">午前（AM）</option>
+        <option value="pm" id="t-slot-pm">午後（PM）</option>
+        <option value="eve" id="t-slot-eve">夜（19時以降）</option>
+      </select>
+    </div>
+    <div class="fg"><label id="t-memo-lbl">メモ（任意）</label>
+      <input type="text" id="memoInp" placeholder="" maxlength="30">
+    </div>
+    <div class="mfoot">
+      <button class="btn-cancel" onclick="closeModal('resOv')" id="t-cancel1">キャンセル</button>
+      <button class="btn-save"   onclick="saveRes()"            id="t-save-res">追加する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Attendance modal -->
+<div class="overlay" id="attOv" onclick="ovClose(event,'attOv')">
+  <div class="modal">
+    <h3 id="t-att-title">参加を表明する <small id="attLbl"></small></h3>
+    <div class="fg"><label id="t-name-lbl">名前</label>
+      <select id="attSel">
+        <option value="" id="t-name-ph">選択してください</option>
+      </select>
+    </div>
+    <div class="mfoot">
+      <button class="btn-cancel" onclick="closeModal('attOv')" id="t-cancel2">キャンセル</button>
+      <button class="btn-join"   onclick="saveAtt()"           id="t-join">参加する ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit key modal -->
+<div class="overlay" id="editOv" onclick="ovClose(event,'editOv')">
+  <div class="modal">
+    <h3 id="t-edit-title">編集モードに切り替え</h3>
+    <div class="fg"><label id="t-key-lbl">編集パスワード</label>
+      <input type="text" id="editInp" placeholder="">
+    </div>
+    <div class="mfoot">
+      <button class="btn-cancel" onclick="closeModal('editOv')" id="t-cancel3">キャンセル</button>
+      <button class="btn-save"   onclick="applyEdit()"          id="t-unlock">解除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm delete modal -->
+<div class="overlay" id="confirmOv" onclick="ovClose(event,'confirmOv')">
+  <div class="modal" style="width:300px">
+    <h3 id="t-confirm-title">削除の確認</h3>
+    <p id="confirmMsg" style="font-size:13px;color:var(--sub);margin-bottom:0;line-height:1.6"></p>
+    <div class="mfoot">
+      <button class="btn-cancel" onclick="closeModal('confirmOv')" id="t-confirm-cancel">キャンセル</button>
+      <button class="btn-save" id="confirmOkBtn" style="background:#c0392b;flex:1.5" id="t-confirm-ok">削除する</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toastEl"></div>
+
+<script>
+// ============================================================
+//  i18n STRINGS
+// ============================================================
+const I18N = {
+  ja: {
+    brand:         '上野原サンライズ',
+    subtitle:      '体育館予約カレンダー',
+    modeView:      '👁 閲覧モード',
+    modeEdit:      '✏️ 編集モード',
+    today:         '今月',
+    shareBtn:      '🔗 共有',
+    editModeBtn:   '✏️ 編集モード',
+    syncReady:     'Ready',
+    syncLoading:   '読込中',
+    syncSaving:    '保存中',
+    syncSaved:     '保存済',
+    syncError:     'エラー',
+    viewUrlLbl:    '閲覧URL（選手・一般向け）',
+    editUrlLbl:    '編集URL（管理者専用）',
+    copyView:      'コピー',
+    copyEdit:      'コピー',
+    legFac:        '施設',
+    legSlot:       '時間帯',
+    amLeg:         '午前 AM',
+    pmLeg:         '午後 PM',
+    eveLeg:        '夜 19時〜',
+    attLeg:        '参加表明',
+    resTitle:      '予約を追加',
+    facLbl:        '施設',
+    facPh:         '選択してください',
+    purLbl:        '用途',
+    purPractice:   'チーム練習',
+    purSolo:        '個人練習',
+    purMatch:      '試合',
+    purEvent:      'イベント',
+    purOther:      'その他',
+    slotLbl:       '時間帯',
+    slotAm:        '午前（AM）',
+    slotPm:        '午後（PM）',
+    slotEve:       '夜（19時以降）',
+    memoLbl:       'メモ（任意）',
+    memoPh:        '例: 1回戦、定期練習…',
+    cancel:        'キャンセル',
+    saveRes:       '追加する',
+    attTitle:      '参加を表明する',
+    nameLbl:       '名前',
+    namePh:        '選手を選んでください',
+    join:          '参加する ✓',
+    editTitle:     '編集モードに切り替え',
+    keyLbl:        '編集パスワード',
+    keyPh:         '管理者から受け取ったキー',
+    unlock:        '解除する',
+    addRes:        '+ 施設予約追加',
+    notePh:        '備考…',
+    attJoin:       '参加する？',
+    attCount:      (n) => `+${n}人参加`,
+    editEnabled:   '編集モードに切り替わりました',
+    wrongKey:      'パスワードが違います',
+    attDup:        (n) => `${n}さんはすでに参加表明済みです`,
+    attSaved:      (n) => `✓ ${n}さんの参加を記録しました`,
+    confirmTitle:  '削除の確認',
+    confirmCancel: 'キャンセル',
+    confirmOk:     '削除する',
+    copiedView:    'URLをコピーしました',
+    copiedEdit:    '編集キーをコピーしました',
+    viewUrlNote:   'このページのURLをそのままシェアしてください',
+    dow:           ['日','月','火','水','木','金','土'],
+    months:        ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+    slotLabels:    { am:'午前', pm:'午後', eve:'夜' },
+    dateLabel:     (m,d,dow,slot) => `${m}/${d} ${dow}曜 — ${slot}`,
+    facilities: [
+      '旧島田中','島田小','上野原中','旧平和中','大月市民総合体育館',
+      '南千住ふれあい館','峡田ふれあい館','夕やけこやけふれあい館',
+      'その他（備考欄参照）'
+    ],
+  },
+  en: {
+    brand:         'Uenohara Sunrise',
+    subtitle:      'Gym Reservation Calendar',
+    modeView:      '👁 View Mode',
+    modeEdit:      '✏️ Edit Mode',
+    today:         'This Month',
+    shareBtn:      '🔗 Share',
+    editModeBtn:   '✏️ Edit Mode',
+    syncReady:     'Ready',
+    syncLoading:   'Loading',
+    syncSaving:    'Saving',
+    syncSaved:     'Saved',
+    syncError:     'Error',
+    viewUrlLbl:    'View URL (for players)',
+    editUrlLbl:    'Edit URL (admin only)',
+    copyView:      'Copy',
+    copyEdit:      'Copy',
+    legFac:        'Facility',
+    legSlot:       'Time Slot',
+    amLeg:         'Morning AM',
+    pmLeg:         'Afternoon PM',
+    eveLeg:        'Evening 19:00+',
+    attLeg:        'Attendance',
+    resTitle:      'Add Reservation',
+    facLbl:        'Facility',
+    facPh:         'Select facility',
+    purLbl:        'Purpose',
+    purPractice:   'Team Practice',
+    purSolo:        'Solo Practice',
+    purMatch:      'Match',
+    purEvent:      'Event',
+    purOther:      'Other',
+    slotLbl:       'Time Slot',
+    slotAm:        'Morning (AM)',
+    slotPm:        'Afternoon (PM)',
+    slotEve:       'Evening (19:00+)',
+    memoLbl:       'Note (optional)',
+    memoPh:        'e.g. Round 1, Weekly practice…',
+    cancel:        'Cancel',
+    saveRes:       'Add',
+    attTitle:      'Mark Attendance',
+    nameLbl:       'Your Name',
+    namePh:        'Select a player',
+    join:          'Join ✓',
+    editTitle:     'Switch to Edit Mode',
+    keyLbl:        'Edit Password',
+    keyPh:         'Enter the key from admin',
+    unlock:        'Unlock',
+    addRes:        '+ Add Facility',
+    notePh:        'Notes…',
+    attJoin:       'Attend?',
+    attCount:      (n) => `+${n} attending`,
+    editEnabled:   'Switched to edit mode',
+    wrongKey:      'Incorrect password',
+    attDup:        (n) => `${n} has already marked attendance`,
+    attSaved:      (n) => `✓ ${n}'s attendance recorded`,
+    confirmTitle:  'Confirm Delete',
+    confirmCancel: 'Cancel',
+    confirmOk:     'Delete',
+    copiedView:    'URL copied',
+    copiedEdit:    'Edit key copied',
+    viewUrlNote:   'Share this page URL directly',
+    dow:           ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+    months:        ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    slotLabels:    { am:'AM', pm:'PM', eve:'Eve' },
+    dateLabel:     (m,d,dow,slot) => `${dow} ${m}/${d} — ${slot}`,
+    facilities: [
+      'Kyushimada Jr.High','Shimada Elem.','Uenohara Jr.High','Kyuheiwa Jr.High','Otsuki City Gym',
+      'Minamisenju Fureai-kan','Kyouden Fureai-kan','Yuyake Koyake Fureai-kan',
+      'Other (see notes)'
+    ],
+  }
+};
+
+// ============================================================
+//  FACILITIES (colors fixed; name from i18n)
+// ============================================================
+const FAC_BASE = [
+  { id:'a', bg:'#2d1414', fg:'#ff8a80', bd:'#ff4444' },
+  { id:'b', bg:'#142d18', fg:'#69f0ae', bd:'#2ec94a' },
+  { id:'c', bg:'#2d2a10', fg:'#ffd740', bd:'#e6be00' },
+  { id:'d', bg:'#2d1120', fg:'#ff6090', bd:'#e0437a' },
+  { id:'e', bg:'#0e1e35', fg:'#82b1ff', bd:'#339af0' },
+  { id:'g', bg:'#1a2535', fg:'#80cbc4', bd:'#26a69a' },
+  { id:'h', bg:'#2a1a2e', fg:'#ce93d8', bd:'#ab47bc' },
+  { id:'i', bg:'#1a2a1a', fg:'#a5d6a7', bd:'#66bb6a' },
+  { id:'f', bg:'#1a1e24', fg:'#9e9e9e', bd:'#6c757d' },
+];
+const PLAYERS = ['Abe','Chiba','Dewa','Hoshi','Kanekubo','Petar','Saito','Sakeki','Shimizu','Shinada','Teo'];
+const FRONT_OFFICE = ['Hasegawa','Omata','Onaga','Shibata','Tanitsuji'];
+const SLOT_IDS = ['am','pm','eve'];
+const EDIT_KEY = 'sunrise2026';
+const STORE_KEY = 'sunrise_cal';
+
+let lang = 'ja';
+let cy, cmo, isEdit = false;
+let data = { reservations:{}, notes:{}, attendance:{} };
+let pRes = null, pAtt = null;
+
+// ============================================================
+//  LANG
+// ============================================================
+function t() { return I18N[lang]; }
+
+function setLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.getElementById('btnJA').classList.toggle('active', l==='ja');
+  document.getElementById('btnEN').classList.toggle('active', l==='en');
+  applyStrings();
+  render();
+}
+
+function applyStrings() {
+  const s = t();
+  // Static labels
+  document.getElementById('t-brand').textContent     = s.brand;
+  document.getElementById('t-subtitle').textContent  = s.subtitle;
+  document.getElementById('modeBadge').textContent   = isEdit ? s.modeEdit : s.modeView;
+  document.getElementById('t-today').textContent     = s.today;
+  document.getElementById('t-share-btn').textContent = s.shareBtn;
+  document.getElementById('editBtn').textContent     = s.editModeBtn;
+  document.getElementById('stxt').textContent        = s.syncReady;
+  document.getElementById('t-view-url-lbl').textContent = s.viewUrlLbl;
+  document.getElementById('t-edit-url-lbl').textContent = s.editUrlLbl;
+  document.getElementById('t-copy-view').textContent = s.copyView;
+  document.getElementById('t-copy-edit').textContent = s.copyEdit;
+  // legend bar removed
+  document.getElementById('t-res-title').childNodes[0].textContent = s.resTitle + ' ';
+  document.getElementById('t-fac-lbl').textContent   = s.facLbl;
+  document.getElementById('t-fac-ph').textContent    = s.facPh;
+  document.getElementById('t-pur-lbl').textContent   = s.purLbl;
+  document.getElementById('t-pur-practice').textContent = s.purPractice;
+  document.getElementById('t-pur-solo').textContent    = s.purSolo;
+  document.getElementById('t-pur-match').textContent    = s.purMatch;
+  document.getElementById('t-pur-event').textContent    = s.purEvent;
+  document.getElementById('t-pur-other').textContent    = s.purOther;
+  document.getElementById('t-slot-lbl').textContent  = s.slotLbl;
+  document.getElementById('t-slot-am').textContent   = s.slotAm;
+  document.getElementById('t-slot-pm').textContent   = s.slotPm;
+  document.getElementById('t-slot-eve').textContent  = s.slotEve;
+  document.getElementById('t-memo-lbl').textContent  = s.memoLbl;
+  document.getElementById('memoInp').placeholder     = s.memoPh;
+  document.getElementById('t-cancel1').textContent   = s.cancel;
+  document.getElementById('t-save-res').textContent  = s.saveRes;
+  document.getElementById('t-att-title').childNodes[0].textContent = s.attTitle + ' ';
+  document.getElementById('t-name-lbl').textContent  = s.nameLbl;
+  buildAttSelect();
+  document.getElementById('t-cancel2').textContent   = s.cancel;
+  document.getElementById('t-join').textContent      = s.join;
+  document.getElementById('t-edit-title').textContent= s.editTitle;
+  document.getElementById('t-key-lbl').textContent   = s.keyLbl;
+  document.getElementById('editInp').placeholder     = s.keyPh;
+  document.getElementById('t-cancel3').textContent   = s.cancel;
+  document.getElementById('t-unlock').textContent    = s.unlock;
+  document.getElementById('viewUrl').textContent     = s.viewUrlNote;
+  const ct = document.getElementById('t-confirm-title');
+  if (ct) ct.textContent = s.confirmTitle;
+  const cc = document.getElementById('t-confirm-cancel');
+  if (cc) cc.textContent = s.confirmCancel;
+  const co = document.getElementById('confirmOkBtn');
+  if (co) co.textContent = s.confirmOk;
+  // Rebuild legend chips
+  buildLegend();
+  // Rebuild fac select
+  buildFacSelect();
+}
+
+// ============================================================
+//  STORAGE (localStorage for standalone HTML)
+// ============================================================
+function loadData() {
+  setSyncing('busy', t().syncLoading);
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) data = JSON.parse(raw);
+    setSyncing('ok', t().syncReady);
+  } catch(e) {
+    setSyncing('ok', t().syncReady);
+  }
+}
+function saveData() {
+  setSyncing('busy', t().syncSaving);
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    setSyncing('ok', t().syncSaved);
+  } catch(e) {
+    setSyncing('err', t().syncError);
+  }
+}
+function setSyncing(s, txt) {
+  document.getElementById('sdot').className = 'sdot ' + s;
+  document.getElementById('stxt').textContent = txt;
+}
+
+// ============================================================
+//  BUILD
+// ============================================================
+function buildLegend() {
+  const el = document.getElementById('facLegend');
+  if (!el) return;
+  el.innerHTML = '';
+  t().facilities.forEach((name, i) => {
+    const f = FAC_BASE[i];
+    const c = document.createElement('span');
+    c.className = 'chip';
+    c.style.cssText = `background:${f.bg};color:${f.fg};border:1px solid ${f.bd}40`;
+    c.innerHTML = `<span class="dot" style="background:${f.bd}"></span>${name}`;
+    el.appendChild(c);
+  });
+}
+function buildFacSelect() {
+  const sel = document.getElementById('facSel');
+  // Keep first placeholder option
+  while (sel.options.length > 1) sel.remove(1);
+  sel.options[0].textContent = t().facPh;
+  t().facilities.forEach((name, i) => {
+    const o = document.createElement('option');
+    o.value = FAC_BASE[i].id;
+    o.textContent = name;
+    sel.appendChild(o);
+  });
+}
+function updateBar() {
+  const f = FAC_BASE.find(x => x.id === document.getElementById('facSel').value);
+  document.getElementById('facBar').style.background = f ? f.bd : 'transparent';
+}
+function buildAttSelect() {
+  const sel = document.getElementById('attSel');
+  if (!sel) return;
+  sel.innerHTML = '';
+  const ph = document.createElement('option');
+  ph.value = ''; ph.id = 't-name-ph';
+  ph.textContent = t().namePh; sel.appendChild(ph);
+
+  const grpP = document.createElement('optgroup');
+  grpP.label = lang === 'ja' ? '選手' : 'Players';
+  PLAYERS.forEach(name => {
+    const o = document.createElement('option'); o.value = name; o.textContent = name;
+    grpP.appendChild(o);
+  });
+  sel.appendChild(grpP);
+
+  const grpF = document.createElement('optgroup');
+  grpF.label = lang === 'ja' ? 'フロントオフィス' : 'Front Office';
+  FRONT_OFFICE.forEach(name => {
+    const o = document.createElement('option'); o.value = name; o.textContent = name;
+    grpF.appendChild(o);
+  });
+  sel.appendChild(grpF);
+}
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function changeMonth(d) {
+  cmo += d;
+  if (cmo > 11) { cmo = 0; cy++; }
+  if (cmo < 0)  { cmo = 11; cy--; }
+  render();
+}
+function goToday() {
+  const n = new Date(); cy = n.getFullYear(); cmo = n.getMonth(); render();
+}
+
+// ============================================================
+//  RENDER
+// ============================================================
+function render() {
+  const s = t();
+  document.getElementById('mlbl').textContent =
+    lang === 'ja'
+      ? `${cy}年 ${s.months[cmo]}`
+      : `${s.months[cmo]} ${cy}`;
+
+  const g = document.getElementById('calGrid');
+  g.innerHTML = '';
+  if (!isEdit) g.classList.add('view-mode'); else g.classList.remove('view-mode');
+
+  // Sticky header
+  const hdr = document.getElementById('calHeader');
+  hdr.innerHTML = '';
+  s.dow.forEach((d, i) => {
+    const el = document.createElement('div');
+    el.className = 'dow-hdr' + (i===0?' sun': i===6?' sat':'');
+    el.textContent = d;
+    hdr.appendChild(el);
+  });
+
+  const fd = new Date(cy, cmo, 1);
+  const ld = new Date(cy, cmo+1, 0).getDate();
+  const sd = fd.getDay();
+  const today = new Date();
+
+  for (let i = 0; i < sd; i++)
+    g.appendChild(buildDay(new Date(cy, cmo, 1-(sd-i)), false));
+  for (let d = 1; d <= ld; d++)
+    g.appendChild(buildDay(new Date(cy, cmo, d), true));
+  const rem = (sd + ld) % 7;
+  if (rem) for (let i = 1; i <= 7-rem; i++)
+    g.appendChild(buildDay(new Date(cy, cmo+1, i), false));
+}
+
+function getDaySched(dow) {
+  // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+  if (dow === 1) return 'off';           // 月: OFF
+  if (dow === 2 || dow === 3) return 'yamanashi'; // 火・水: 山梨
+  if (dow === 5) return 'tokyo';         // 金: 東京
+  return null; // 木・土・日: 表示なし
+}
+function fmtDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function buildDay(dt, inM) {
+  const dow = dt.getDay(), ds = fmtDate(dt);
+  const isToday = dt.toDateString() === new Date().toDateString();
+  const s = t();
+
+  const cell = document.createElement('div');
+  let cls = 'day';
+  // Schedule: 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+  const sched = inM ? getDaySched(dow) : null;
+  if (!inM) cls += ' out';
+  if (dow===0) cls += ' is-sun'; if (dow===6) cls += ' is-sat';
+  if (isToday) cls += ' is-today';
+  if (sched === 'off') cls += ' is-off';
+  cell.className = cls;
+
+  // Date header
+  const dh = document.createElement('div'); dh.className = 'date-hdr';
+  const nv = (data.notes||{})[ds] || '';
+
+  // LEFT: dnum + sched badge (always stuck to left)
+  const dhLeft = document.createElement('div'); dhLeft.className = 'date-hdr-left';
+  const dn = document.createElement('div'); dn.className = 'dnum';
+  dn.textContent = dt.getDate(); dhLeft.appendChild(dn);
+  if (sched) {
+    const sb = document.createElement('span');
+    sb.className = 'sched-badge ' + sched;
+    const schedLabels = {
+      off: 'OFF',
+      yamanashi: lang==='ja' ? '山梨' : 'Yamanashi',
+      tokyo: lang==='ja' ? '東京' : 'Tokyo',
+    };
+    sb.textContent = schedLabels[sched] || '';
+    dhLeft.appendChild(sb);
+  }
+  dh.appendChild(dhLeft);
+
+  // RIGHT: att-count badge + note preview (pushed to right)
+  const dhRight = document.createElement('div'); dhRight.className = 'date-hdr-right';
+  if (inM) {
+    const dayAtt = data.attendance && data.attendance[ds] ? data.attendance[ds] : {};
+    const uniquePlayers = new Set();
+    const uniqueFront   = new Set();
+    SLOT_IDS.forEach(sid => {
+      (dayAtt[sid] || []).forEach(n => {
+        if (FRONT_OFFICE.includes(n)) uniqueFront.add(n);
+        else uniquePlayers.add(n);
+      });
+    });
+    const pCount = uniquePlayers.size;
+    const fCount = uniqueFront.size;
+    if (pCount > 0 || fCount > 0) {
+      const acb = document.createElement('span');
+      acb.className = 'att-count-badge';
+      if (lang === 'ja') {
+        const parts = [];
+        if (pCount > 0) parts.push(`選手${pCount}名`);
+        if (fCount > 0) parts.push(`FO ${fCount}名`);
+        acb.textContent = '参加 ' + parts.join(' / ');
+      } else {
+        const parts = [];
+        if (pCount > 0) parts.push(`${pCount} players`);
+        if (fCount > 0) parts.push(`${fCount} FO`);
+        acb.textContent = parts.join(' / ');
+      }
+      dhRight.appendChild(acb);
+    }
+  }
+  if (nv) { const np = document.createElement('div'); np.className = 'note-prev'; np.textContent = nv; dhRight.appendChild(np); }
+  dh.appendChild(dhRight);
+  cell.appendChild(dh);
+
+  // Slots
+  const slotsEl = document.createElement('div'); slotsEl.className = 'slots';
+  SLOT_IDS.forEach(sid => {
+    const slotLabel = s.slotLabels[sid];
+    const row = document.createElement('div'); row.className = 'slot-row';
+    const lbl = document.createElement('div');
+    lbl.className = 'slbl ' + sid; lbl.textContent = slotLabel; row.appendChild(lbl);
+    const body = document.createElement('div'); body.className = 'sbody';
+
+    const ress = ((data.reservations||{})[ds]||{})[sid]||[];
+    ress.forEach((r, ri) => {
+      const fi = FAC_BASE.findIndex(x => x.id === r.facId);
+      if (fi < 0) return;
+      const f = FAC_BASE[fi];
+      const fname = s.facilities[fi];
+      const chip = document.createElement('div'); chip.className = 'rchip';
+      chip.style.cssText = `background:${f.bg};color:${f.fg};border-left-color:${f.bd}`;
+      const purposeDisplay = lang === 'en' ? translatePurpose(r.purpose) : r.purpose;
+      const label = r.purpose === '試合' || r.purpose === 'Match'
+        ? `⚔ ${fname}${r.memo ? '·'+r.memo : ''}`
+        : `${fname}${purposeDisplay && purposeDisplay !== s.purPractice ? '·'+purposeDisplay : ''}${r.memo ? '·'+r.memo : ''}`;
+      chip.innerHTML = `<span class="rchip-txt">${label}</span>`;
+      if (isEdit) {
+        const dx = document.createElement('button'); dx.className = 'dx'; dx.textContent = '×';
+        dx.onclick = e => { e.stopPropagation(); delRes(ds, sid, ri); }; chip.appendChild(dx);
+      }
+      body.appendChild(chip);
+    });
+
+    const atts = ((data.attendance||{})[ds]||{})[sid]||[];
+    const ar = document.createElement('div'); ar.className = 'att-row';
+    atts.forEach((name, ni) => {
+      const tag = document.createElement('span'); tag.className = 'att-tag';
+      tag.innerHTML = `✓ ${name}`;
+      if (isEdit) {
+        const rm = document.createElement('button'); rm.className = 'rm'; rm.textContent = '×';
+        rm.onclick = e => { e.stopPropagation(); delAtt(ds, sid, ni); }; tag.appendChild(rm);
+      }
+      ar.appendChild(tag);
+    });
+    if (inM) {
+      const ab = document.createElement('button');
+      ab.className = 'att-btn' + (atts.length ? ' has' : '');
+      ab.textContent = atts.length ? s.attCount(atts.length) : s.attJoin;
+      ab.onclick = () => openAttModal(ds, sid, dt, slotLabel);
+      ar.appendChild(ab);
+    }
+    if (inM && isEdit) {
+      const ab = document.createElement('button'); ab.className = 'add-btn';
+      ab.textContent = s.addRes;
+      ab.onclick = () => openResModal(ds, sid, dt, slotLabel);
+      body.appendChild(ab);
+    }
+    body.appendChild(ar);
+    row.appendChild(body); slotsEl.appendChild(row);
+  });
+  cell.appendChild(slotsEl);
+
+  if (inM) {
+    const nw = document.createElement('div'); nw.className = 'note-wrap';
+    const ta = document.createElement('textarea'); ta.className = 'note-inp'; ta.rows = 1;
+    ta.placeholder = isEdit ? s.notePh : ''; ta.value = nv; ta.readOnly = !isEdit;
+    ta.addEventListener('change', () => {
+      if (!data.notes) data.notes = {};
+      data.notes[ds] = ta.value.trim(); saveData();
+    });
+    ta.addEventListener('input', () => { ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; });
+    nw.appendChild(ta); cell.appendChild(nw);
+  }
+  return cell;
+}
+
+function translatePurpose(p) {
+  const map = { 'チーム練習':'Team Practice','個人練習':'Solo Practice','試合':'Match','イベント':'Event','その他':'Other','Practice':'Practice','Team Practice':'Team Practice','Solo Practice':'Solo Practice' };
+  return map[p] || p;
+}
+
+// ============================================================
+//  RESERVATION CRUD
+// ============================================================
+function openResModal(ds, sid, dt, slotLabel) {
+  pRes = { ds, sid };
+  const s = t();
+  document.getElementById('resLbl').textContent =
+    s.dateLabel(dt.getMonth()+1, dt.getDate(), s.dow[dt.getDay()], slotLabel);
+  document.getElementById('slotSel').value = sid;
+  document.getElementById('facSel').value = '';
+  document.getElementById('purSel').value = s.purPractice;
+  document.getElementById('memoInp').value = '';
+  document.getElementById('facBar').style.background = 'transparent';
+  document.getElementById('resOv').classList.add('open');
+  setTimeout(() => document.getElementById('facSel').focus(), 50);
+}
+function saveRes() {
+  if (!pRes) return;
+  const facId = document.getElementById('facSel').value;
+  if (!facId) { document.getElementById('facSel').focus(); return; }
+  const sid     = document.getElementById('slotSel').value;
+  const purpose = document.getElementById('purSel').value;
+  const memo    = document.getElementById('memoInp').value.trim();
+  const { ds }  = pRes;
+  if (!data.reservations) data.reservations = {};
+  if (!data.reservations[ds]) data.reservations[ds] = {};
+  if (!data.reservations[ds][sid]) data.reservations[ds][sid] = [];
+  data.reservations[ds][sid].push({ facId, purpose, memo });
+  saveData(); closeModal('resOv'); render();
+}
+let pendingDelete = null;
+
+function confirmDelete(msg, onConfirm) {
+  pendingDelete = onConfirm;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmOv').classList.add('open');
+  document.getElementById('confirmOkBtn').onclick = () => {
+    closeModal('confirmOv');
+    if (pendingDelete) { pendingDelete(); pendingDelete = null; }
+  };
+}
+
+function delRes(ds, sid, idx) {
+  const r = ((data.reservations||{})[ds]||{})[sid]?.[idx];
+  const fi = r ? FAC_BASE.findIndex(x => x.id === r.facId) : -1;
+  const fname = fi >= 0 ? t().facilities[fi] : '';
+  const msg = lang === 'ja'
+    ? `「${fname}」の予約を削除しますか？`
+    : `Delete reservation for "${fname}"?`;
+  confirmDelete(msg, () => {
+    data.reservations[ds][sid].splice(idx, 1);
+    if (!data.reservations[ds][sid].length) delete data.reservations[ds][sid];
+    if (!Object.keys(data.reservations[ds]).length) delete data.reservations[ds];
+    saveData(); render();
+  });
+}
+
+// ============================================================
+//  ATTENDANCE
+// ============================================================
+function openAttModal(ds, sid, dt, slotLabel) {
+  pAtt = { ds, sid };
+  const s = t();
+  document.getElementById('attLbl').textContent =
+    s.dateLabel(dt.getMonth()+1, dt.getDate(), s.dow[dt.getDay()], slotLabel);
+  document.getElementById('attSel').value = '';
+  document.getElementById('attOv').classList.add('open');
+  setTimeout(() => document.getElementById('attSel').focus(), 50);
+}
+function saveAtt() {
+  if (!pAtt) return;
+  const name = document.getElementById('attSel').value.trim();
+  if (!name) { document.getElementById('attSel').focus(); return; }
+  const { ds, sid } = pAtt;
+  if (!data.attendance) data.attendance = {};
+  if (!data.attendance[ds]) data.attendance[ds] = {};
+  if (!data.attendance[ds][sid]) data.attendance[ds][sid] = [];
+  if (data.attendance[ds][sid].includes(name)) {
+    showToast(t().attDup(name)); closeModal('attOv'); return;
+  }
+  data.attendance[ds][sid].push(name);
+  saveData(); closeModal('attOv'); render(); showToast(t().attSaved(name));
+}
+function delAtt(ds, sid, idx) {
+  data.attendance[ds][sid].splice(idx, 1); saveData(); render();
+}
+
+// ============================================================
+//  EDIT MODE
+// ============================================================
+function openEditModal() {
+  document.getElementById('editInp').value = '';
+  document.getElementById('editOv').classList.add('open');
+  setTimeout(() => document.getElementById('editInp').focus(), 50);
+}
+function applyEdit() {
+  const key = document.getElementById('editInp').value.trim();
+  if (key === EDIT_KEY) {
+    isEdit = true;
+    document.getElementById('modeBadge').textContent = t().modeEdit;
+    document.getElementById('modeBadge').className   = 'badge edit';
+    document.getElementById('editBtn').style.display = 'none';
+    document.getElementById('editShareBox').style.display = '';
+    closeModal('editOv'); render(); showToast(t().editEnabled);
+  } else {
+    const inp = document.getElementById('editInp');
+    inp.style.borderColor = '#ff6b6b';
+    setTimeout(() => inp.style.borderColor = '', 1200);
+  }
+}
+
+// ============================================================
+//  SHARE
+// ============================================================
+function toggleShare() { document.getElementById('sharePanel').classList.toggle('show'); }
+function copyUrl(type) {
+  const base = window.location.href.split('?')[0];
+  const url = type === 'edit' ? `${base}?key=${EDIT_KEY}` : base;
+  navigator.clipboard.writeText(url).then(() =>
+    showToast(type === 'edit' ? t().copiedEdit : t().copiedView)
+  );
+}
+
+// ============================================================
+//  MODAL HELPERS
+// ============================================================
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id === 'resOv') pRes = null;
+  if (id === 'attOv') pAtt = null;
+}
+function ovClose(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+// ============================================================
+//  TOAST
+// ============================================================
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toastEl');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ============================================================
+//  KEYBOARD
+// ============================================================
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape')
+    ['resOv','attOv','editOv','confirmOv'].forEach(id => {
+      if (document.getElementById(id).classList.contains('open')) closeModal(id);
+    });
+  if (e.key === 'Enter') {
+    if (document.getElementById('resOv').classList.contains('open'))  saveRes();
+    if (document.getElementById('attOv').classList.contains('open'))  saveAtt();
+    if (document.getElementById('editOv').classList.contains('open')) applyEdit();
+  }
+});
+
+// ============================================================
+//  BOOT
+// ============================================================
+(function init() {
+  const n = new Date(); cy = n.getFullYear(); cmo = n.getMonth();
+  loadData();
+  applyStrings();
+  render();
+  // Sync horizontal scroll between body and sticky header
+  const wrap = document.getElementById('calWrap');
+  const hdrInner = document.getElementById('calHeaderInner');
+  if (wrap && hdrInner) {
+    wrap.addEventListener('scroll', () => {
+      hdrInner.style.transform = `translateX(-${wrap.scrollLeft}px)`;
+    });
+  }
+})();
+</script>
+</body>
+</html>
