@@ -268,6 +268,38 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
 .dm-close-btn { background: none; border: 1px solid var(--border); color: var(--sub); padding: 8px 16px; border-radius: 7px; cursor: pointer; font-size: 12px; font-family: 'Noto Sans JP',sans-serif; transition: all .12s; }
 .dm-close-btn:hover { border-color: var(--sub); color: var(--text); }
 .sch-item { padding: 8px 14px; border-bottom: 1px solid var(--border2); cursor: pointer; transition: background .1s; }
+/* 掲示板 */
+.board-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 300; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 20px 16px 40px; backdrop-filter: blur(6px); }
+.board-overlay.open { display: flex; }
+.board-modal { background: var(--surf2); border: 1px solid var(--border); border-radius: 14px; width: 520px; max-width: 100%; box-shadow: 0 24px 80px rgba(0,0,0,.7); margin: auto; overflow: hidden; }
+.board-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; gap: 10px; }
+.board-header h3 { font-size: 14px; font-weight: 700; color: var(--gold); flex: 1; margin: 0; }
+.board-close { background: none; border: 1px solid var(--border); color: var(--sub); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px; line-height: 28px; text-align: center; }
+.board-posts { padding: 12px 0; max-height: 55vh; overflow-y: auto; }
+.board-posts::-webkit-scrollbar { width: 4px; }
+.board-posts::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.board-post { padding: 12px 20px; border-bottom: 1px solid var(--border2); }
+.board-post:last-child { border-bottom: none; }
+.board-post-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.board-post-author { font-size: 11px; font-weight: 700; color: var(--gold); }
+.board-post-author.fo { color: #82b1ff; }
+.board-post-time { font-size: 10px; color: var(--muted); margin-left: auto; }
+.board-post-body { font-size: 12px; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
+.board-post-delete { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; display: none; }
+.board-post:hover .board-post-delete { display: inline; }
+.board-post-delete:hover { color: #ff6b6b; }
+.board-compose { padding: 12px 20px; border-top: 1px solid var(--border2); background: var(--surf3); }
+.board-compose-author { font-size: 11px; font-weight: 700; color: var(--sub); margin-bottom: 6px; }
+.board-compose-author span { color: var(--gold); }
+.board-textarea { width: 100%; background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: 'Noto Sans JP',sans-serif; padding: 10px 12px; outline: none; resize: none; line-height: 1.5; }
+.board-textarea:focus { border-color: var(--gold2); }
+.board-send-row { display: flex; justify-content: flex-end; margin-top: 8px; gap: 8px; align-items: center; }
+.board-char-count { font-size: 10px; color: var(--muted); }
+.board-send-btn { background: var(--gold); border: none; color: #0b0f18; padding: 7px 18px; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP',sans-serif; }
+.board-send-btn:hover { background: #f5d060; }
+.board-empty { padding: 30px 20px; text-align: center; color: var(--muted); font-size: 12px; }
+.board-badge { position: absolute; top: -4px; right: -4px; background: #ff6b6b; color: #fff; font-size: 9px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.board-btn-wrap { position: relative; display: inline-block; }
 .toast { position: fixed; bottom: 22px; right: 22px; background: #1e7a33; color: #fff; padding: 9px 15px; border-radius: 8px; font-size: 12px; z-index: 300; opacity: 0; transform: translateY(8px); transition: all .22s; pointer-events: none; }
 .toast.show { opacity: 1; transform: translateY(0); }
 ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -355,9 +387,9 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
   const DB_REF = 'sunrise_cal';
 
   // Firebase経由でデータ読み込み
-  window.firebaseLoadData = async function() {
+  window.firebaseLoadData = async function(path) {
     try {
-      const snapshot = await get(ref(db, DB_REF));
+      const snapshot = await get(ref(db, path || DB_REF));
       if (snapshot.exists()) {
         return snapshot.val();
       }
@@ -369,9 +401,9 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
   };
 
   // Firebase経由でデータ保存
-  window.firebaseSaveData = async function(data) {
+  window.firebaseSaveData = async function(data, path) {
     try {
-      await set(ref(db, DB_REF), data);
+      await set(ref(db, path || DB_REF), data);
       return true;
     } catch(e) {
       console.error('Firebase save error:', e);
@@ -423,6 +455,10 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
       </div>
       <button class="btn-s" id="t-today" onclick="goToday()">今月</button>
       <button class="btn-s" id="t-share-btn" onclick="toggleShare()">🔗 共有</button>
+      <div class="board-btn-wrap">
+        <button class="btn-s" id="boardBtn" onclick="openBoard()">📣 <span id="t-board-btn">掲示板</span></button>
+        <div class="board-badge" id="boardBadge" style="display:none"></div>
+      </div>
       <button class="btn-s" id="editBtn" onclick="openEditModal()">✏️ 編集モード</button>
       <button class="btn-s" id="analyticsBtn" onclick="openAnalytics()" style="display:none">📊 分析</button>
       <!-- View toggle -->
@@ -581,6 +617,25 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
   </div>
 </div>
 
+<!-- Board modal -->
+<div class="board-overlay" id="boardOv" onclick="ovClose(event,'boardOv')">
+  <div class="board-modal">
+    <div class="board-header">
+      <h3>📣 <span id="t-board-title">お知らせ掲示板</span></h3>
+      <button class="board-close" onclick="closeModal('boardOv')">✕</button>
+    </div>
+    <div class="board-posts" id="boardPosts"></div>
+    <div class="board-compose">
+      <div class="board-compose-author" id="boardAuthorLine">投稿者: <span id="boardAuthorName">ゲスト</span></div>
+      <textarea class="board-textarea" id="boardTextarea" rows="3" placeholder="メッセージを入力…" maxlength="500" oninput="updateBoardCount()"></textarea>
+      <div class="board-send-row">
+        <span class="board-char-count" id="boardCharCount">0 / 500</span>
+        <button class="board-send-btn" onclick="postBoard()" id="t-board-send">投稿する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Confirm delete modal -->
 <div class="overlay" id="confirmOv" onclick="ovClose(event,'confirmOv')">
   <div class="modal" style="width:300px">
@@ -657,6 +712,12 @@ const I18N = {
     attSaved:      (n) => `✓ ${n}さんの参加を記録しました`,
     sideTitle:     'スケジュール一覧',
     sideSub:       '今月以降の予定',
+    boardTitle:    'お知らせ掲示板',
+    boardBtn:      '掲示板',
+    boardSend:     '投稿する',
+    boardPh:       'メッセージを入力…',
+    boardAuthor:   '投稿者',
+    boardEmpty:    'まだ投稿がありません',
     confirmTitle:  '削除の確認',
     confirmCancel: 'キャンセル',
     confirmOk:     '削除する',
@@ -732,6 +793,12 @@ const I18N = {
     attSaved:      (n) => `✓ ${n}'s attendance recorded`,
     sideTitle:     'Schedule',
     sideSub:       'Upcoming events',
+    boardTitle:    'Notice Board',
+    boardBtn:      'Board',
+    boardSend:     'Post',
+    boardPh:       'Enter your message…',
+    boardAuthor:   'Posting as',
+    boardEmpty:    'No posts yet',
     confirmTitle:  'Confirm Delete',
     confirmCancel: 'Cancel',
     confirmOk:     'Delete',
@@ -743,7 +810,7 @@ const I18N = {
     slotLabels:    { am:'AM', pm:'PM', eve:'Eve', exe:'EXE', rbl:'RBL', match:'Match' },
     dateLabel:     (m,d,dow,slot) => `${dow} ${m}/${d} — ${slot}`,
     facilities: [
-      'Kyushimada Jr.High','Shimada Elem.','Uenohara Jr.High','Kyuheiwa Jr.High','Otsuki City Gym',
+      'ex-Shimada Jr.High','Shimada Elem.','Uenohara Jr.High','ex-Heiwa Jr.High','Otsuki City Gym',
       'Minamisenju Fureai-kan','Kyouden Fureai-kan','Yuyake Koyake Fureai-kan',
       'Other (see notes)',
       'Match Venue'
@@ -841,6 +908,14 @@ function applyStrings() {
   if (sp) sp.textContent = s.sideTitle;
   const ss = document.getElementById('t-side-sub');
   if (ss) ss.textContent = s.sideSub;
+  const bt = document.getElementById('t-board-title');
+  if (bt) bt.textContent = s.boardTitle;
+  const bb = document.getElementById('t-board-btn');
+  if (bb) bb.textContent = s.boardBtn;
+  const bs = document.getElementById('t-board-send');
+  if (bs) bs.textContent = s.boardSend;
+  const bta = document.getElementById('boardTextarea');
+  if (bta) bta.placeholder = s.boardPh;
   const ct = document.getElementById('t-confirm-title');
   if (ct) ct.textContent = s.confirmTitle;
   const cc = document.getElementById('t-confirm-cancel');
@@ -1500,7 +1575,7 @@ document.addEventListener('click', e => {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape')
-    ['resOv','attOv','editOv','confirmOv','detailOv','analyticsOv'].forEach(id => {
+    ['resOv','attOv','editOv','confirmOv','detailOv','analyticsOv','boardOv'].forEach(id => {
       if (document.getElementById(id).classList.contains('open')) closeModal(id);
     });
   if (e.key === 'Enter') {
@@ -1642,6 +1717,114 @@ function renderWeekView() {
     nw.appendChild(ta);card.appendChild(nw);
     el.appendChild(card);
   }
+}
+
+// ============================================================
+//  BOARD (掲示板)
+// ============================================================
+const BOARD_KEY = 'sunrise_board';
+
+async function loadBoard() {
+  try {
+    if (window.firebaseLoadData) {
+      const snap = await window.firebaseLoadData('board');
+      return snap ? Object.values(snap).sort((a,b) => b.ts - a.ts) : [];
+    }
+  } catch(e) {}
+  try {
+    return JSON.parse(localStorage.getItem(BOARD_KEY) || '[]');
+  } catch(e) { return []; }
+}
+
+async function saveBoard(posts) {
+  try {
+    if (window.firebaseSaveData) {
+      const obj = {};
+      posts.forEach((p,i) => { obj['post_'+p.ts] = p; });
+      await window.firebaseSaveData(obj, 'board');
+      return;
+    }
+  } catch(e) {}
+  localStorage.setItem(BOARD_KEY, JSON.stringify(posts));
+}
+
+let _boardPosts = [];
+
+async function openBoard() {
+  document.getElementById('boardOv').classList.add('open');
+  document.getElementById('boardTextarea').value = '';
+  updateBoardCount();
+  updateBoardAuthor();
+  _boardPosts = await loadBoard();
+  renderBoardPosts();
+  // 未読バッジを消す
+  document.getElementById('boardBadge').style.display = 'none';
+  localStorage.setItem('sunrise_board_read', Date.now());
+}
+
+function updateBoardAuthor() {
+  const s = t();
+  const nameEl = document.getElementById('boardAuthorName');
+  const lineEl = document.getElementById('boardAuthorLine');
+  if (nameEl) nameEl.textContent = currentUser || (lang==='ja'?'ゲスト':'Guest');
+  if (nameEl) nameEl.style.color = currentUser
+    ? (FRONT_OFFICE.includes(currentUser) ? '#82b1ff' : 'var(--gold)')
+    : 'var(--sub)';
+  if (lineEl) lineEl.childNodes[0].textContent = (s.boardAuthor || '投稿者') + ': ';
+}
+
+function updateBoardCount() {
+  const ta = document.getElementById('boardTextarea');
+  const ct = document.getElementById('boardCharCount');
+  if (ta && ct) ct.textContent = `${ta.value.length} / 500`;
+}
+
+function renderBoardPosts() {
+  const el = document.getElementById('boardPosts');
+  if (!el) return;
+  if (!_boardPosts.length) {
+    el.innerHTML = `<div class="board-empty">${lang==='ja'?'まだ投稿がありません':'No posts yet'}</div>`;
+    return;
+  }
+  el.innerHTML = _boardPosts.map((p, idx) => {
+    const isFO = FRONT_OFFICE.includes(p.author);
+    const isMe = p.author === currentUser;
+    const dt = new Date(p.ts);
+    const timeStr = `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+    const authorCls = isFO ? 'fo' : '';
+    const canDelete = isMe || isEdit;
+    return `<div class="board-post">
+      <div class="board-post-header">
+        <span class="board-post-author ${authorCls}">${p.author || (lang==='ja'?'ゲスト':'Guest')}</span>
+        ${isFO ? `<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(130,177,255,.1);color:#82b1ff">FO</span>` : ''}
+        <span class="board-post-time">${timeStr}</span>
+        ${canDelete ? `<button class="board-post-delete" onclick="deletePost(${idx})">✕ 削除</button>` : ''}
+      </div>
+      <div class="board-post-body">${escHtml(p.body)}</div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function postBoard() {
+  const ta = document.getElementById('boardTextarea');
+  const body = ta.value.trim();
+  if (!body) return;
+  const post = { author: currentUser || (lang==='ja'?'ゲスト':'Guest'), body, ts: Date.now() };
+  _boardPosts.unshift(post);
+  await saveBoard(_boardPosts);
+  ta.value = ''; updateBoardCount();
+  renderBoardPosts();
+  showToast(lang==='ja' ? '📣 投稿しました' : '📣 Posted');
+}
+
+async function deletePost(idx) {
+  _boardPosts.splice(idx, 1);
+  await saveBoard(_boardPosts);
+  renderBoardPosts();
 }
 
 // ============================================================
