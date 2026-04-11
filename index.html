@@ -62,14 +62,23 @@ header { background: linear-gradient(180deg,#0f1520,var(--bg)); border-bottom: 1
 
 /* LANG SWITCH */
 .lang-switch { display: flex; background: var(--surf3); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
-.account-sel-wrap { display: flex; align-items: center; gap: 7px; background: var(--surf3); border: 2px solid var(--border); border-radius: 20px; padding: 4px 12px 4px 10px; transition: all .15s; }
-.account-sel-wrap .acct-icon { font-size: 14px; flex-shrink: 0; }
-.account-sel-wrap select { background: transparent; border: none; color: var(--sub); font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP',sans-serif; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; padding-right: 16px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%237a8fa8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0 center; min-width: 70px; max-width: 130px; }
-.account-sel-wrap select option { background: #1a2235; color: #e2eaf6; }
-.account-sel-wrap select optgroup { background: #131929; color: #7a8fa8; font-size: 10px; }
-.account-sel-wrap.logged-in { border-color: var(--gold); background: rgba(240,192,64,.15); box-shadow: 0 0 10px rgba(240,192,64,.2); }
-.account-sel-wrap.logged-in select { color: var(--gold); font-size: 13px; }
-.account-sel-wrap.logged-in .acct-icon { filter: none; }
+/* Custom account dropdown */
+.acct-btn { display: flex; align-items: center; gap: 7px; background: var(--surf3); border: 2px solid var(--border); border-radius: 20px; padding: 5px 12px 5px 10px; cursor: pointer; transition: all .15s; position: relative; user-select: none; }
+.acct-btn:hover { border-color: var(--sub); }
+.acct-btn .acct-icon { font-size: 14px; flex-shrink: 0; }
+.acct-btn .acct-name { font-size: 12px; font-weight: 700; color: var(--sub); font-family: 'Noto Sans JP',sans-serif; }
+.acct-btn .acct-arrow { font-size: 9px; color: var(--muted); margin-left: 2px; transition: transform .15s; }
+.acct-btn.open .acct-arrow { transform: rotate(180deg); }
+.acct-btn.logged-in { border-color: var(--gold); background: rgba(240,192,64,.15); box-shadow: 0 0 12px rgba(240,192,64,.25); }
+.acct-btn.logged-in .acct-name { color: var(--gold); font-size: 13px; }
+.acct-dropdown { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: var(--surf2); border: 1px solid var(--border); border-radius: 10px; min-width: 160px; box-shadow: 0 8px 32px rgba(0,0,0,.6); z-index: 200; overflow: hidden; }
+.acct-dropdown.open { display: block; animation: mIn .14s ease; }
+.acct-group-label { font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; padding: 8px 14px 4px; }
+.acct-option { padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--text); cursor: pointer; transition: background .1s; font-family: 'Noto Sans JP',sans-serif; }
+.acct-option:hover { background: var(--surf3); }
+.acct-option.selected { color: var(--gold); background: var(--gold-dim); }
+.acct-option.guest { color: var(--sub); border-bottom: 1px solid var(--border2); }
+.acct-divider { height: 1px; background: var(--border2); margin: 4px 0; }
 .lang-btn { background: none; border: none; color: var(--sub); padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: .06em; transition: all .12s; font-family: 'Noto Sans JP',sans-serif; }
 .lang-btn.active { background: var(--gold); color: #0b0f18; }
 .lang-btn:not(.active):hover { color: var(--text); }
@@ -396,12 +405,14 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
       </div>
     </div>
     <span class="badge view" id="modeBadge">👁 閲覧モード</span>
-    <!-- Account selector - prominent, next to mode badge -->
-    <div class="account-sel-wrap" id="acctWrap">
-      <span class="acct-icon">👤</span>
-      <select id="acctSel" onchange="setAccount(this.value)">
-        <option value="">ゲスト</option>
-      </select>
+    <!-- Account selector - custom dropdown -->
+    <div style="position:relative" id="acctContainer">
+      <div class="acct-btn" id="acctBtn" onclick="toggleAcctDropdown()">
+        <span class="acct-icon">👤</span>
+        <span class="acct-name" id="acctName">ゲスト</span>
+        <span class="acct-arrow">▼</span>
+      </div>
+      <div class="acct-dropdown" id="acctDropdown"></div>
     </div>
     <div class="nav-row">
       <div class="sync-row"><span class="sdot ok" id="sdot"></span><span id="stxt">Ready</span></div>
@@ -917,41 +928,78 @@ function buildFacSelect() {
   });
 }
 function buildAccountSelect() {
-  const sel = document.getElementById('acctSel');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">' + (lang==='ja'?'ゲスト':'Guest') + '</option>';
-  const grpP = document.createElement('optgroup');
-  grpP.label = lang==='ja' ? '選手' : 'Players';
+  const dropdown = document.getElementById('acctDropdown');
+  if (!dropdown) return;
+  dropdown.innerHTML = '';
+
+  // ゲスト
+  const guest = document.createElement('div');
+  guest.className = 'acct-option guest' + (!currentUser ? ' selected' : '');
+  guest.textContent = lang==='ja' ? '👤 ゲスト' : '👤 Guest';
+  guest.onclick = () => setAccount('');
+  dropdown.appendChild(guest);
+
+  // 選手グループ
+  const lblP = document.createElement('div');
+  lblP.className = 'acct-group-label';
+  lblP.textContent = lang==='ja' ? '選手' : 'Players';
+  dropdown.appendChild(lblP);
   PLAYERS.forEach(name => {
-    const o = document.createElement('option'); o.value = name; o.textContent = name;
-    grpP.appendChild(o);
+    const item = document.createElement('div');
+    item.className = 'acct-option' + (currentUser === name ? ' selected' : '');
+    item.textContent = name;
+    item.onclick = () => setAccount(name);
+    dropdown.appendChild(item);
   });
-  sel.appendChild(grpP);
-  const grpF = document.createElement('optgroup');
-  grpF.label = lang==='ja' ? 'フロントオフィス' : 'Front Office';
+
+  // FOグループ
+  const div = document.createElement('div'); div.className = 'acct-divider';
+  dropdown.appendChild(div);
+  const lblF = document.createElement('div');
+  lblF.className = 'acct-group-label';
+  lblF.textContent = lang==='ja' ? 'フロントオフィス' : 'Front Office';
+  dropdown.appendChild(lblF);
   FRONT_OFFICE.forEach(name => {
-    const o = document.createElement('option'); o.value = name; o.textContent = name;
-    grpF.appendChild(o);
+    const item = document.createElement('div');
+    item.className = 'acct-option' + (currentUser === name ? ' selected' : '');
+    item.textContent = name;
+    item.onclick = () => setAccount(name);
+    dropdown.appendChild(item);
   });
-  sel.appendChild(grpF);
-  sel.value = currentUser;
+
   updateAccountUI();
+}
+
+function toggleAcctDropdown() {
+  const btn = document.getElementById('acctBtn');
+  const dd  = document.getElementById('acctDropdown');
+  if (!btn || !dd) return;
+  const isOpen = dd.classList.contains('open');
+  dd.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
 }
 
 function setAccount(name) {
   currentUser = name;
   localStorage.setItem('sunrise_user', name);
+  // ドロップダウンを閉じる
+  document.getElementById('acctDropdown')?.classList.remove('open');
+  document.getElementById('acctBtn')?.classList.remove('open');
   updateAccountUI();
+  buildAccountSelect();
   render();
 }
 
 function updateAccountUI() {
-  const wrap = document.getElementById('acctWrap');
-  if (!wrap) return;
+  const btn  = document.getElementById('acctBtn');
+  const nameEl = document.getElementById('acctName');
+  if (!btn || !nameEl) return;
   if (currentUser) {
-    wrap.classList.add('logged-in');
+    btn.classList.add('logged-in');
+    nameEl.textContent = currentUser;
   } else {
-    wrap.classList.remove('logged-in');
+    btn.classList.remove('logged-in');
+    nameEl.textContent = lang==='ja' ? 'ゲスト' : 'Guest';
   }
 }
 
@@ -1204,7 +1252,7 @@ function buildDay(dt, inM) {
       const purposeDisplay = lang === 'en' ? translatePurpose(r.purpose) : r.purpose;
       const label = r.purpose === '試合' || r.purpose === 'Match'
         ? `⚔ ${fname}${r.memo ? '·'+r.memo : ''}`
-        : `${fname}${purposeDisplay && purposeDisplay !== s.purPractice ? '·'+purposeDisplay : ''}${r.memo ? '·'+r.memo : ''}`;
+        : `${fname}${purposeDisplay ? ' · '+purposeDisplay : ''}${r.memo ? ' · '+r.memo : ''}`;
       chip.innerHTML = `<span class="rchip-txt">${label}</span>`;
       chip.onclick = (e) => { e.stopPropagation(); openDetailDirect(ds, sid, r, dt); };
       if (isEdit) {
@@ -1225,7 +1273,8 @@ function buildDay(dt, inM) {
       }
       ar.appendChild(tag);
     });
-    if (inM) {
+    // 参加ボタン: 施設予約がある or すでに参加者がいる場合のみ表示
+    if (inM && (ress.length > 0 || atts.length > 0)) {
       const ab = document.createElement('button');
       const iJoined = currentUser && atts.includes(currentUser);
       ab.className = 'att-btn' + (atts.length ? ' has' : '') + (iJoined ? ' joined-me' : '');
@@ -1441,6 +1490,14 @@ function showToast(msg) {
 // ============================================================
 //  KEYBOARD
 // ============================================================
+document.addEventListener('click', e => {
+  const container = document.getElementById('acctContainer');
+  if (container && !container.contains(e.target)) {
+    document.getElementById('acctDropdown')?.classList.remove('open');
+    document.getElementById('acctBtn')?.classList.remove('open');
+  }
+});
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape')
     ['resOv','attOv','editOv','confirmOv','detailOv','analyticsOv'].forEach(id => {
@@ -1540,7 +1597,7 @@ function renderWeekView() {
         chip.style.cursor='pointer';
         const purposeD=lang==='en'?translatePurpose(r.purpose):r.purpose;
         const isMatch=r.purpose==='試合'||r.purpose==='Match';
-        const label=isMatch?`⚔ ${r.memo||fname}`:`${fname}${purposeD&&purposeD!==s.purPractice?'·'+purposeD:''}${r.memo?'·'+r.memo:''}`;
+        const label=isMatch?`⚔ ${r.memo||fname}`:`${fname}${purposeD?' · '+purposeD:''}${r.memo?' · '+r.memo:''}`;
         chip.innerHTML=`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${label}</span>`;
         chip.onclick=(e)=>{e.stopPropagation();openDetailDirect(ds,sid,r,dt);};
         if(isEdit){const dx=document.createElement('button');dx.className='dx';dx.textContent='×';dx.onclick=e=>{e.stopPropagation();delRes(ds,sid,ri);};chip.appendChild(dx);}
@@ -1554,17 +1611,20 @@ function renderWeekView() {
         if(isEdit){const rm=document.createElement('button');rm.className='rm';rm.textContent='×';rm.onclick=e=>{e.stopPropagation();delAtt(ds,sid,ni);};tag.appendChild(rm);}
         attRow.appendChild(tag);
       });
-      const iJoinedW = currentUser && atts.includes(currentUser);
-      const ab=document.createElement('button');
-      ab.className='att-btn'+(atts.length?' has':'')+(iJoinedW?' joined-me':'');
-      if(iJoinedW){
-        ab.textContent=lang==='ja'?'✓ 参加済（取消）':'✓ Joined (cancel)';
-        ab.style.cssText='border-style:solid;background:rgba(81,207,102,.25);color:#69db7c;border-color:rgba(81,207,102,.5)';
-      }else{
-        ab.textContent=atts.length?s.attCount(atts.length):s.attJoin;
+      // 参加ボタン: 施設予約がある or すでに参加者がいる場合のみ表示
+      if (ress.length > 0 || atts.length > 0) {
+        const iJoinedW = currentUser && atts.includes(currentUser);
+        const ab=document.createElement('button');
+        ab.className='att-btn'+(atts.length?' has':'')+(iJoinedW?' joined-me':'');
+        if(iJoinedW){
+          ab.textContent=lang==='ja'?'✓ 参加済（取消）':'✓ Joined (cancel)';
+          ab.style.cssText='border-style:solid;background:rgba(81,207,102,.25);color:#69db7c;border-color:rgba(81,207,102,.5)';
+        }else{
+          ab.textContent=atts.length?s.attCount(atts.length):s.attJoin;
+        }
+        ab.onclick=()=>openAttModal(ds,sid,dt,slotLabel);
+        attRow.appendChild(ab);
       }
-      ab.onclick=()=>openAttModal(ds,sid,dt,slotLabel);
-      attRow.appendChild(ab);
       body.appendChild(attRow);
 
       if(isEdit){const addB=document.createElement('button');addB.className='week-add-btn';addB.textContent=s.addRes;addB.onclick=()=>openResModal(ds,sid,dt,slotLabel);body.appendChild(addB);}
