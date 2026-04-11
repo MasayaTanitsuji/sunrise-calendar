@@ -62,6 +62,11 @@ header { background: linear-gradient(180deg,#0f1520,var(--bg)); border-bottom: 1
 
 /* LANG SWITCH */
 .lang-switch { display: flex; background: var(--surf3); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.account-sel-wrap { display: flex; align-items: center; gap: 6px; background: var(--surf2); border: 1px solid var(--border); border-radius: var(--r); padding: 3px 8px 3px 10px; }
+.account-sel-wrap .acct-icon { font-size: 13px; flex-shrink: 0; }
+.account-sel-wrap select { background: none; border: none; color: var(--text); font-size: 11px; font-weight: 700; font-family: 'Noto Sans JP',sans-serif; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; padding-right: 14px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%237a8fa8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0 center; min-width: 80px; max-width: 140px; }
+.account-sel-wrap.logged-in { border-color: var(--gold2); background: var(--gold-dim); }
+.account-sel-wrap.logged-in select { color: var(--gold); }
 .lang-btn { background: none; border: none; color: var(--sub); padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: .06em; transition: all .12s; font-family: 'Noto Sans JP',sans-serif; }
 .lang-btn.active { background: var(--gold); color: #0b0f18; }
 .lang-btn:not(.active):hover { color: var(--text); }
@@ -397,6 +402,13 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
       </div>
       <button class="btn-s" id="t-today" onclick="goToday()">今月</button>
       <button class="btn-s" id="t-share-btn" onclick="toggleShare()">🔗 共有</button>
+      <!-- Account selector -->
+      <div class="account-sel-wrap" id="acctWrap">
+        <span class="acct-icon">👤</span>
+        <select id="acctSel" onchange="setAccount(this.value)">
+          <option value="">ゲスト</option>
+        </select>
+      </div>
       <button class="btn-s" id="editBtn" onclick="openEditModal()">✏️ 編集モード</button>
       <button class="btn-s" id="analyticsBtn" onclick="openAnalytics()" style="display:none">📊 分析</button>
       <!-- View toggle -->
@@ -749,6 +761,7 @@ const STORE_KEY = 'sunrise_cal';
 let lang = 'ja';
 let viewMode = window.innerWidth <= 768 ? 'week' : 'month';
 let currentWeekStart = null;
+let currentUser = localStorage.getItem('sunrise_user') || '';
 let cy, cmo, isEdit = false;
 let data = { reservations:{}, notes:{}, attendance:{} };
 let pRes = null, pAtt = null;
@@ -822,8 +835,8 @@ function applyStrings() {
   if (co) co.textContent = s.confirmOk;
   // Rebuild legend chips
   buildLegend();
-  // Rebuild fac select
   buildFacSelect();
+  buildAccountSelect();
 }
 
 // ============================================================
@@ -900,6 +913,45 @@ function buildFacSelect() {
     sel.appendChild(o);
   });
 }
+function buildAccountSelect() {
+  const sel = document.getElementById('acctSel');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">' + (lang==='ja'?'ゲスト':'Guest') + '</option>';
+  const grpP = document.createElement('optgroup');
+  grpP.label = lang==='ja' ? '選手' : 'Players';
+  PLAYERS.forEach(name => {
+    const o = document.createElement('option'); o.value = name; o.textContent = name;
+    grpP.appendChild(o);
+  });
+  sel.appendChild(grpP);
+  const grpF = document.createElement('optgroup');
+  grpF.label = lang==='ja' ? 'フロントオフィス' : 'Front Office';
+  FRONT_OFFICE.forEach(name => {
+    const o = document.createElement('option'); o.value = name; o.textContent = name;
+    grpF.appendChild(o);
+  });
+  sel.appendChild(grpF);
+  sel.value = currentUser;
+  updateAccountUI();
+}
+
+function setAccount(name) {
+  currentUser = name;
+  localStorage.setItem('sunrise_user', name);
+  updateAccountUI();
+  render();
+}
+
+function updateAccountUI() {
+  const wrap = document.getElementById('acctWrap');
+  if (!wrap) return;
+  if (currentUser) {
+    wrap.classList.add('logged-in');
+  } else {
+    wrap.classList.remove('logged-in');
+  }
+}
+
 function updateBar() {
   const f = FAC_BASE.find(x => x.id === document.getElementById('facSel').value);
   document.getElementById('facBar').style.background = f ? f.bd : 'transparent';
@@ -1172,8 +1224,14 @@ function buildDay(dt, inM) {
     });
     if (inM) {
       const ab = document.createElement('button');
-      ab.className = 'att-btn' + (atts.length ? ' has' : '');
-      ab.textContent = atts.length ? s.attCount(atts.length) : s.attJoin;
+      const iJoined = currentUser && atts.includes(currentUser);
+      ab.className = 'att-btn' + (atts.length ? ' has' : '') + (iJoined ? ' joined-me' : '');
+      if (iJoined) {
+        ab.textContent = lang==='ja' ? '✓ 参加済（取消）' : '✓ Joined (cancel)';
+        ab.style.cssText = 'border-style:solid;background:rgba(81,207,102,.25);color:#69db7c;border-color:rgba(81,207,102,.5)';
+      } else {
+        ab.textContent = atts.length ? s.attCount(atts.length) : s.attJoin;
+      }
       ab.onclick = () => openAttModal(ds, sid, dt, slotLabel);
       ar.appendChild(ab);
     }
@@ -1268,13 +1326,38 @@ function delRes(ds, sid, idx) {
 //  ATTENDANCE
 // ============================================================
 function openAttModal(ds, sid, dt, slotLabel) {
-  pAtt = { ds, sid };
+  pAtt = { ds, sid, dt, slotLabel };
+  // ログイン中ならワンクリックで参加
+  if (currentUser) {
+    saveAttDirect(currentUser);
+    return;
+  }
   const s = t();
   document.getElementById('attLbl').textContent =
     s.dateLabel(dt.getMonth()+1, dt.getDate(), s.dow[dt.getDay()], slotLabel);
   document.getElementById('attSel').value = '';
   document.getElementById('attOv').classList.add('open');
   setTimeout(() => document.getElementById('attSel').focus(), 50);
+}
+
+function saveAttDirect(name) {
+  if (!pAtt) return;
+  const { ds, sid } = pAtt;
+  if (!data.attendance) data.attendance = {};
+  if (!data.attendance[ds]) data.attendance[ds] = {};
+  if (!data.attendance[ds][sid]) data.attendance[ds][sid] = [];
+  if (data.attendance[ds][sid].includes(name)) {
+    // すでに参加済み → 参加を取り消す
+    data.attendance[ds][sid] = data.attendance[ds][sid].filter(n => n !== name);
+    if (!data.attendance[ds][sid].length) delete data.attendance[ds][sid];
+    if (!Object.keys(data.attendance[ds]).length) delete data.attendance[ds];
+    saveData(); render();
+    showToast(lang==='ja' ? `${name} の参加を取り消しました` : `Cancelled attendance for ${name}`);
+    return;
+  }
+  data.attendance[ds][sid].push(name);
+  saveData(); render();
+  showToast(lang==='ja' ? `✓ ${name} の参加を記録しました` : `✓ Recorded attendance for ${name}`);
 }
 function saveAtt() {
   if (!pAtt) return;
@@ -1468,8 +1551,15 @@ function renderWeekView() {
         if(isEdit){const rm=document.createElement('button');rm.className='rm';rm.textContent='×';rm.onclick=e=>{e.stopPropagation();delAtt(ds,sid,ni);};tag.appendChild(rm);}
         attRow.appendChild(tag);
       });
-      const ab=document.createElement('button');ab.className='att-btn'+(atts.length?' has':'');
-      ab.textContent=atts.length?s.attCount(atts.length):s.attJoin;
+      const iJoinedW = currentUser && atts.includes(currentUser);
+      const ab=document.createElement('button');
+      ab.className='att-btn'+(atts.length?' has':'')+(iJoinedW?' joined-me':'');
+      if(iJoinedW){
+        ab.textContent=lang==='ja'?'✓ 参加済（取消）':'✓ Joined (cancel)';
+        ab.style.cssText='border-style:solid;background:rgba(81,207,102,.25);color:#69db7c;border-color:rgba(81,207,102,.5)';
+      }else{
+        ab.textContent=atts.length?s.attCount(atts.length):s.attJoin;
+      }
       ab.onclick=()=>openAttModal(ds,sid,dt,slotLabel);
       attRow.appendChild(ab);
       body.appendChild(attRow);
@@ -1760,8 +1850,13 @@ function openDetail(ds, sid, idx) {
 
   // 参加ボタン
   const attBtn = document.getElementById('dm-att-btn');
-  attBtn.textContent = lang==='ja' ? '参加する ✓' : 'Join ✓';
+  const dmAtts = ((data.attendance||{})[ds]||{})[sid]||[];
+  const dmJoined = currentUser && dmAtts.includes(currentUser);
+  attBtn.textContent = dmJoined
+    ? (lang==='ja' ? '✓ 参加済（取消）' : '✓ Joined (cancel)')
+    : (lang==='ja' ? '参加する ✓' : 'Join ✓');
   attBtn.style.display = '';
+  attBtn.style.background = dmJoined ? '#1a4a2a' : '#1e7a33';
   _detailPending = { ds, sid, dt: d, slotLabel };
 
   // 閉じるボタン
@@ -1773,7 +1868,12 @@ function openDetail(ds, sid, idx) {
 function openAttFromDetail() {
   if (!_detailPending) return;
   closeModal('detailOv');
-  openAttModal(_detailPending.ds, _detailPending.sid, _detailPending.dt, _detailPending.slotLabel);
+  pAtt = { ds: _detailPending.ds, sid: _detailPending.sid };
+  if (currentUser) {
+    saveAttDirect(currentUser);
+  } else {
+    openAttModal(_detailPending.ds, _detailPending.sid, _detailPending.dt, _detailPending.slotLabel);
+  }
 }
 
 function renderSidePanel() {
