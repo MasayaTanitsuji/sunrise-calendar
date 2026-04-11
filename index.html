@@ -850,6 +850,9 @@ function render() {
     g.appendChild(buildDay(new Date(cy, cmo+1, i), false));
 }
 
+function hasMatch(ds) {
+  return !!((data.reservations||{})[ds]||{})['match']?.length;
+}
 function getDaySched(dow) {
   // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
   if (dow === 1) return 'off';           // 月: OFF
@@ -932,9 +935,11 @@ function buildDay(dt, inM) {
   dh.appendChild(dhRight);
   cell.appendChild(dh);
 
-  // Slots
+  // Slots (試合がある日はam/pm/eveをスキップ)
+  const dayHasMatch = hasMatch(ds);
   const slotsEl = document.createElement('div'); slotsEl.className = 'slots';
   SLOT_IDS.forEach(sid => {
+    if (dayHasMatch && sid !== 'match') return;
     const slotLabel = s.slotLabels[sid];
     const row = document.createElement('div');
     row.className = 'slot-row' + (sid === 'match' ? ' is-match' : '');
@@ -1220,7 +1225,9 @@ function renderWeekView() {
 
     // Slots
     const slotsWrap=document.createElement('div');slotsWrap.className='week-slots';
+    const weekDayHasMatch = hasMatch(ds);
     SLOT_IDS.forEach(sid=>{
+      if (weekDayHasMatch && sid !== 'match') return;
       const slotLabel=s.slotLabels[sid];
       const ress=((data.reservations||{})[ds]||{})[sid]||[];
       const atts=((data.attendance||{})[ds]||{})[sid]||[];
