@@ -130,6 +130,8 @@ header { background: linear-gradient(180deg,#0f1520,var(--bg)); border-bottom: 1
 .sched-badge.off    { background: rgba(255,100,100,.12); color: #ff6b6b; border: 1px solid rgba(255,100,100,.2); }
 .sched-badge.yamanashi { background: rgba(240,192,64,.12); color: var(--gold); border: 1px solid rgba(240,192,64,.2); }
 .sched-badge.tokyo  { background: rgba(130,177,255,.12); color: #82b1ff; border: 1px solid rgba(130,177,255,.2); }
+.sched-badge.exe-badge { background: rgba(255,215,0,.12); color: #ffd700; border: 1px solid rgba(255,165,0,.3); font-size: 9px; }
+.sched-badge.rbl-badge { background: rgba(130,177,255,.12); color: #82b1ff; border: 1px solid rgba(51,154,240,.3); font-size: 9px; }
 .date-hdr { display: flex; align-items: center; padding: 4px 5px 3px; border-bottom: 1px solid var(--border2); min-height: 26px; gap: 4px; }
 .date-hdr-left  { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
 .date-hdr-right { display: flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; overflow: hidden; }
@@ -154,7 +156,7 @@ header { background: linear-gradient(180deg,#0f1520,var(--bg)); border-bottom: 1
 .slot-row.is-match { background: rgba(255,165,0,.06); border-radius: 4px; padding: 2px 0; }
 .rchip.is-match { font-size: 11px; padding: 4px 8px; font-weight: 700; }
 .sbody { flex: 1; display: flex; flex-direction: column; gap: 1px; }
-.rchip { display: flex; align-items: center; padding: 3px 6px; border-radius: 3px; font-size: 11px; font-weight: 500; border-left: 2px solid transparent; position: relative; overflow: hidden; cursor: default; }
+.rchip { display: flex; align-items: center; padding: 3px 6px; border-radius: 3px; font-size: 11px; font-weight: 500; border-left: 2px solid transparent; position: relative; overflow: hidden; cursor: pointer; }
 .rchip:hover { opacity: .85; }
 .rchip-txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; max-width: calc(100% - 14px); }
 .rchip .dx { display: none; position: absolute; right: 2px; background: rgba(0,0,0,.3); border: none; cursor: pointer; width: 13px; height: 13px; border-radius: 50%; font-size: 9px; line-height: 13px; text-align: center; padding: 0; color: inherit; }
@@ -194,6 +196,61 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
 .mfoot .btn-save:hover { background: #f5d060; }
 .mfoot .btn-join { flex: 2; background: #1e7a33; border: none; color: #fff; padding: 9px; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP',sans-serif; transition: all .12s; }
 .mfoot .btn-join:hover { background: #25a144; }
+.analytics-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 300; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 20px 16px 40px; backdrop-filter: blur(6px); }
+.analytics-overlay.open { display: flex; }
+.analytics-modal { background: var(--surf2); border: 1px solid var(--border); border-radius: 14px; width: 680px; max-width: 100%; box-shadow: 0 24px 80px rgba(0,0,0,.7); margin: auto; overflow: hidden; }
+.am-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; gap: 10px; }
+.am-header h3 { font-size: 15px; font-weight: 700; color: var(--gold); flex: 1; }
+.am-close { background: none; border: 1px solid var(--border); color: var(--sub); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+.am-tabs { display: flex; border-bottom: 1px solid var(--border2); }
+.am-tab { padding: 10px 18px; font-size: 12px; font-weight: 700; color: var(--sub); cursor: pointer; border-bottom: 2px solid transparent; transition: all .12s; background: none; border-top: none; border-left: none; border-right: none; font-family: 'Noto Sans JP',sans-serif; }
+.am-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.am-body { padding: 20px 22px; max-height: 70vh; overflow-y: auto; }
+.am-summary-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
+.am-stat-card { background: var(--surf3); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 14px; }
+.am-stat-card .sc-val { font-size: 22px; font-weight: 700; color: var(--gold); font-family: 'DM Mono',monospace; }
+.am-stat-card .sc-lbl { font-size: 10px; color: var(--sub); margin-top: 2px; }
+.am-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.am-table th { text-align: left; padding: 7px 10px; font-size: 10px; font-weight: 700; color: var(--sub); letter-spacing: .07em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.am-table td { padding: 8px 10px; border-bottom: 1px solid var(--border2); color: var(--text); vertical-align: middle; }
+.am-table tr:last-child td { border-bottom: none; }
+.am-table tr:hover td { background: var(--surf3); }
+.am-bar-wrap { width: 100%; height: 6px; background: var(--border2); border-radius: 3px; overflow: hidden; }
+.am-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #51cf66, #2ec94a); transition: width .3s; }
+.am-bar.low { background: linear-gradient(90deg, #ff8787, #ff6b6b); }
+.am-bar.mid { background: linear-gradient(90deg, #ffd43b, #f0c040); }
+.am-pct { font-size: 11px; font-weight: 700; font-family: 'DM Mono',monospace; min-width: 36px; text-align: right; }
+.am-tag { display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 10px; }
+.am-tag.player { background: rgba(81,207,102,.12); color: #69db7c; border: 1px solid rgba(81,207,102,.22); }
+.am-tag.fo { background: rgba(130,177,255,.08); color: #74c0fc; border: 1px solid rgba(130,177,255,.2); }
+.am-section-title { font-size: 11px; font-weight: 700; color: var(--sub); letter-spacing: .08em; text-transform: uppercase; margin: 16px 0 8px; }
+.detail-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 300; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 20px 16px 40px; backdrop-filter: blur(6px); }
+.detail-modal-overlay.open { display: flex; }
+.detail-modal { background: var(--surf2); border: 1px solid var(--border); border-radius: 14px; padding: 0; width: 400px; max-width: 100%; box-shadow: 0 24px 80px rgba(0,0,0,.7); margin: auto; overflow: hidden; }
+.dm-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border2); }
+.dm-header h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.dm-header h3.is-match { color: #ffd700; }
+.dm-date-row { font-size: 11px; color: var(--sub); display: flex; align-items: center; gap: 8px; }
+.dm-date-row .dm-dow { padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+.dm-date-row .dm-dow.sun { background: var(--sun-hd); color: #ff8787; }
+.dm-date-row .dm-dow.sat { background: var(--sat-hd); color: #74c0fc; }
+.dm-date-row .dm-dow.wkd { background: var(--surf3); color: var(--sub); }
+.dm-body { padding: 16px 20px; }
+.dm-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.dm-row:last-child { margin-bottom: 0; }
+.dm-label { font-size: 10px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: .06em; min-width: 56px; padding-top: 2px; }
+.dm-value { font-size: 12px; color: var(--text); flex: 1; line-height: 1.5; }
+.dm-fac-chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; border-left: 3px solid transparent; }
+.dm-att-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.dm-att-player { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: rgba(81,207,102,.12); color: #69db7c; border: 1px solid rgba(81,207,102,.22); }
+.dm-att-fo { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: rgba(130,177,255,.08); color: #74c0fc; border: 1px solid rgba(130,177,255,.2); }
+.dm-empty-att { font-size: 11px; color: var(--muted); font-style: italic; }
+.dm-footer { padding: 12px 20px; border-top: 1px solid var(--border2); display: flex; justify-content: flex-end; gap: 8px; }
+.dm-att-btn { background: #1e7a33; border: none; color: #fff; padding: 8px 16px; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP',sans-serif; transition: all .12s; }
+.dm-att-btn:hover { background: #25a144; }
+.dm-close-btn { background: none; border: 1px solid var(--border); color: var(--sub); padding: 8px 16px; border-radius: 7px; cursor: pointer; font-size: 12px; font-family: 'Noto Sans JP',sans-serif; transition: all .12s; }
+.dm-close-btn:hover { border-color: var(--sub); color: var(--text); }
+.sch-item { padding: 8px 14px; border-bottom: 1px solid var(--border2); cursor: pointer; transition: background .1s; }
 .toast { position: fixed; bottom: 22px; right: 22px; background: #1e7a33; color: #fff; padding: 9px 15px; border-radius: 8px; font-size: 12px; z-index: 300; opacity: 0; transform: translateY(8px); transition: all .22s; pointer-events: none; }
 .toast.show { opacity: 1; transform: translateY(0); }
 ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -284,6 +341,7 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
       <button class="btn-s" id="t-today" onclick="goToday()">今月</button>
       <button class="btn-s" id="t-share-btn" onclick="toggleShare()">🔗 共有</button>
       <button class="btn-s" id="editBtn" onclick="openEditModal()">✏️ 編集モード</button>
+      <button class="btn-s" id="analyticsBtn" onclick="openAnalytics()" style="display:none">📊 分析</button>
       <!-- View toggle -->
       <div class="view-toggle">
         <button class="view-btn active" id="btnMonth" data-view="month" onclick="setView('month')" id="t-view-month">月</button>
@@ -409,6 +467,37 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
   </div>
 </div>
 
+<!-- Analytics modal -->
+<div class="analytics-overlay" id="analyticsOv" onclick="ovClose(event,'analyticsOv')">
+  <div class="analytics-modal">
+    <div class="am-header">
+      <h3>📊 参加アナリティクス</h3>
+      <button class="am-close" onclick="closeModal('analyticsOv')">✕</button>
+    </div>
+    <div class="am-tabs">
+      <button class="am-tab active" onclick="switchAmTab('players')">選手</button>
+      <button class="am-tab" onclick="switchAmTab('fo')">フロントオフィス</button>
+      <button class="am-tab" onclick="switchAmTab('sessions')">練習・試合別</button>
+    </div>
+    <div class="am-body" id="amBody"></div>
+  </div>
+</div>
+
+<!-- Detail view modal -->
+<div class="detail-modal-overlay" id="detailOv" onclick="ovClose(event,'detailOv')">
+  <div class="detail-modal">
+    <div class="dm-header">
+      <h3 id="dm-title"></h3>
+      <div class="dm-date-row" id="dm-date-row"></div>
+    </div>
+    <div class="dm-body" id="dm-body"></div>
+    <div class="dm-footer">
+      <button class="dm-close-btn" onclick="closeModal('detailOv')" id="t-dm-close">閉じる</button>
+      <button class="dm-att-btn" id="dm-att-btn" onclick="openAttFromDetail()" style="display:none" id="t-dm-attend">参加する ✓</button>
+    </div>
+  </div>
+</div>
+
 <!-- Confirm delete modal -->
 <div class="overlay" id="confirmOv" onclick="ovClose(event,'confirmOv')">
   <div class="modal" style="width:300px">
@@ -491,7 +580,7 @@ const I18N = {
     copiedView:    'URLをコピーしました',
     copiedEdit:    '編集キーをコピーしました',
     viewUrlNote:   'このページのURLをそのままシェアしてください',
-    dow:           ['日','月','火','水','木','金','土'],
+    dow:           ['月','火','水','木','金','土','日'],
     months:        ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
     slotLabels:    { am:'午前', pm:'午後', eve:'夜', exe:'EXE', rbl:'RBL', match:'試合' },
     dateLabel:     (m,d,dow,slot) => `${m}/${d} ${dow}曜 — ${slot}`,
@@ -566,7 +655,7 @@ const I18N = {
     copiedView:    'URL copied',
     copiedEdit:    'Edit key copied',
     viewUrlNote:   'Share this page URL directly',
-    dow:           ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+    dow:           ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
     months:        ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
     slotLabels:    { am:'AM', pm:'PM', eve:'Eve', exe:'EXE', rbl:'RBL', match:'Match' },
     dateLabel:     (m,d,dow,slot) => `${dow} ${m}/${d} — ${slot}`,
@@ -596,7 +685,7 @@ const FAC_BASE = [
 ];
 const PLAYERS = ['Abe','Chiba','Dewa','Hoshi','Kanekubo','Petar','Saito','Sakeki','Shimizu','Shinada','Teo'];
 const FRONT_OFFICE = ['Baba','Hasegawa','Hayashi','Machiyo','Omata','Onaga','Sachi','Shibata','Tachikawa','Tanitsuji'];
-const SLOT_IDS = ['am','pm','eve','exe','rbl','match'];
+const SLOT_IDS = ['am','pm','eve'];
 const EDIT_KEY = 'sunrise2026';
 const STORE_KEY = 'sunrise_cal';
 
@@ -793,7 +882,7 @@ function goToday() {
 }
 function getWeekStart(d) {
   const dt = new Date(d);
-  const day = dt.getDay(); // 0=Sun
+  const day = (dt.getDay() + 6) % 7; // 月曜=0
   dt.setDate(dt.getDate() - day);
   dt.setHours(0,0,0,0);
   return dt;
@@ -835,14 +924,14 @@ function render() {
   hdr.innerHTML = '';
   s.dow.forEach((d, i) => {
     const el = document.createElement('div');
-    el.className = 'dow-hdr' + (i===0?' sun': i===6?' sat':'');
+    el.className = 'dow-hdr' + (i===6?' sun': i===5?' sat':'');
     el.textContent = d;
     hdr.appendChild(el);
   });
 
   const fd = new Date(cy, cmo, 1);
   const ld = new Date(cy, cmo+1, 0).getDate();
-  const sd = fd.getDay();
+  const sd = (fd.getDay() + 6) % 7; // 月曜始まり: 月=0,火=1,...日=6
   const today = new Date();
 
   for (let i = 0; i < sd; i++)
@@ -903,6 +992,22 @@ function buildDay(dt, inM) {
     sb.textContent = schedLabels[sched] || '';
     dhLeft.appendChild(sb);
   }
+  // 試合バッジ: EXE/RBL それぞれの会場を表示
+  if (inM) {
+    const dayRes = (data.reservations||{})[ds]||{};
+    ['exe','rbl'].forEach(leagueId => {
+      const entries = dayRes[leagueId];
+      if (!entries || !entries.length) return;
+      // メモから会場名を抽出 (例: "EXE ROUND1 · ワテラス（東京/千代田）")
+      const memo = entries[0].memo || '';
+      const venueMatch = memo.match(/·\s*(.+?)（(.+?)）/);
+      const location = venueMatch ? venueMatch[2].trim() : '';
+      const lb = document.createElement('span');
+      lb.className = 'sched-badge ' + (leagueId === 'exe' ? 'exe-badge' : 'rbl-badge');
+      lb.textContent = location ? `${leagueId.toUpperCase()} ${location}` : leagueId.toUpperCase();
+      dhLeft.appendChild(lb);
+    });
+  }
   dh.appendChild(dhLeft);
 
   // RIGHT: att-count badge + note preview (pushed to right)
@@ -940,12 +1045,15 @@ function buildDay(dt, inM) {
   dh.appendChild(dhRight);
   cell.appendChild(dh);
 
-  // Slots (試合がある日はam/pm/eveをスキップ)
+  // Slots: 試合のある日はexe/rbl/matchのみ、ない日はam/pm/eve
   const dayHasMatch = hasMatch(ds);
+  const dayResKeys = Object.keys((data.reservations||{})[ds]||{});
+  const activeSIDs = dayHasMatch
+    ? dayResKeys.filter(k => ['exe','rbl','match'].includes(k))
+    : SLOT_IDS;
   const slotsEl = document.createElement('div'); slotsEl.className = 'slots';
-  SLOT_IDS.forEach(sid => {
-    if (dayHasMatch && sid !== 'match') return;
-    const slotLabel = s.slotLabels[sid];
+  activeSIDs.forEach(sid => {
+    const slotLabel = s.slotLabels[sid] || sid;
     const row = document.createElement('div');
     row.className = 'slot-row' + (sid === 'match' ? ' is-match' : '');
     const lbl = document.createElement('div');
@@ -960,12 +1068,14 @@ function buildDay(dt, inM) {
       const fname = s.facilities[fi];
       const chip = document.createElement('div'); chip.className = 'rchip';
       chip.style.cssText = `background:${f.bg};color:${f.fg};border-left-color:${f.bd}`;
+      chip.style.cursor = 'pointer';
       if (sid === 'match') chip.classList.add('is-match');
       const purposeDisplay = lang === 'en' ? translatePurpose(r.purpose) : r.purpose;
       const label = r.purpose === '試合' || r.purpose === 'Match'
         ? `⚔ ${fname}${r.memo ? '·'+r.memo : ''}`
         : `${fname}${purposeDisplay && purposeDisplay !== s.purPractice ? '·'+purposeDisplay : ''}${r.memo ? '·'+r.memo : ''}`;
       chip.innerHTML = `<span class="rchip-txt">${label}</span>`;
+      chip.onclick = (e) => { e.stopPropagation(); openDetailDirect(ds, sid, r, dt); };
       if (isEdit) {
         const dx = document.createElement('button'); dx.className = 'dx'; dx.textContent = '×';
         dx.onclick = e => { e.stopPropagation(); delRes(ds, sid, ri); }; chip.appendChild(dx);
@@ -1123,6 +1233,7 @@ function applyEdit() {
     document.getElementById('modeBadge').textContent = t().modeEdit;
     document.getElementById('modeBadge').className   = 'badge edit';
     document.getElementById('editBtn').style.display = 'none';
+    document.getElementById('analyticsBtn').style.display = '';
     document.getElementById('editShareBox').style.display = '';
     closeModal('editOv'); render(); showToast(t().editEnabled);
   } else {
@@ -1170,7 +1281,7 @@ function showToast(msg) {
 // ============================================================
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape')
-    ['resOv','attOv','editOv','confirmOv'].forEach(id => {
+    ['resOv','attOv','editOv','confirmOv','detailOv','analyticsOv'].forEach(id => {
       if (document.getElementById(id).classList.contains('open')) closeModal(id);
     });
   if (e.key === 'Enter') {
@@ -1215,10 +1326,22 @@ function renderWeekView() {
       sb.textContent = sched==='off'?'OFF':sched==='yamanashi'?(lang==='ja'?'山梨':'Yamanashi'):(lang==='ja'?'東京':'Tokyo');
       hdr.appendChild(sb);
     }
+    // 週表示の試合バッジ
+    ['exe','rbl'].forEach(leagueId => {
+      const entries = ((data.reservations||{})[ds]||{})[leagueId];
+      if (!entries || !entries.length) return;
+      const memo = entries[0].memo || '';
+      const venueMatch = memo.match(/·\s*(.+?)（(.+?)）/);
+      const location = venueMatch ? venueMatch[2].trim() : '';
+      const lb=document.createElement('span');
+      lb.className='wdh-sched sched-badge '+(leagueId==='exe'?'exe-badge':'rbl-badge');
+      lb.textContent = location ? `${leagueId.toUpperCase()} ${location}` : leagueId.toUpperCase();
+      hdr.appendChild(lb);
+    });
     // Attendance count
     const dayAtt=(data.attendance||{})[ds]||{};
     const uniqP=new Set(),uniqF=new Set();
-    SLOT_IDS.forEach(sl=>{(dayAtt[sl]||[]).forEach(n=>{if(FRONT_OFFICE.includes(n))uniqF.add(n);else uniqP.add(n);});});
+    ['am','pm','eve','exe','rbl','match'].forEach(sl=>{(dayAtt[sl]||[]).forEach(n=>{if(FRONT_OFFICE.includes(n))uniqF.add(n);else uniqP.add(n);});});
     if(uniqP.size||uniqF.size){
       const att=document.createElement('span');att.className='wdh-att';
       const parts=[];
@@ -1231,9 +1354,12 @@ function renderWeekView() {
     // Slots
     const slotsWrap=document.createElement('div');slotsWrap.className='week-slots';
     const weekDayHasMatch = hasMatch(ds);
-    SLOT_IDS.forEach(sid=>{
-      if (weekDayHasMatch && sid !== 'match') return;
-      const slotLabel=s.slotLabels[sid];
+    const weekDayResKeys = Object.keys((data.reservations||{})[ds]||{});
+    const weekActiveSIDs = weekDayHasMatch
+      ? weekDayResKeys.filter(k => ['exe','rbl','match'].includes(k))
+      : SLOT_IDS;
+    weekActiveSIDs.forEach(sid=>{
+      const slotLabel=s.slotLabels[sid]||sid;
       const ress=((data.reservations||{})[ds]||{})[sid]||[];
       const atts=((data.attendance||{})[ds]||{})[sid]||[];
       if(!ress.length && !atts.length && !isEdit && sched==='off') return;
@@ -1249,10 +1375,12 @@ function renderWeekView() {
         const f=FAC_BASE[fi];const fname=s.facilities[fi];
         const chip=document.createElement('div');chip.className='week-rchip';
         chip.style.cssText=`background:${f.bg};color:${f.fg};border-left-color:${f.bd}`;
+        chip.style.cursor='pointer';
         const purposeD=lang==='en'?translatePurpose(r.purpose):r.purpose;
         const isMatch=r.purpose==='試合'||r.purpose==='Match';
         const label=isMatch?`⚔ ${r.memo||fname}`:`${fname}${purposeD&&purposeD!==s.purPractice?'·'+purposeD:''}${r.memo?'·'+r.memo:''}`;
         chip.innerHTML=`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${label}</span>`;
+        chip.onclick=(e)=>{e.stopPropagation();openDetailDirect(ds,sid,r,dt);};
         if(isEdit){const dx=document.createElement('button');dx.className='dx';dx.textContent='×';dx.onclick=e=>{e.stopPropagation();delRes(ds,sid,ri);};chip.appendChild(dx);}
         body.appendChild(chip);
       });
@@ -1287,6 +1415,291 @@ function renderWeekView() {
   }
 }
 
+// ============================================================
+//  ANALYTICS
+// ============================================================
+let _amTab = 'players';
+
+function openAnalytics() {
+  _amTab = 'players';
+  document.querySelectorAll('.am-tab').forEach((b,i) => b.classList.toggle('active', i===0));
+  document.getElementById('analyticsOv').classList.add('open');
+  renderAnalytics();
+}
+
+function switchAmTab(tab) {
+  _amTab = tab;
+  document.querySelectorAll('.am-tab').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes(tab));
+  });
+  renderAnalytics();
+}
+
+function renderAnalytics() {
+  const el = document.getElementById('amBody');
+  const s = t();
+  const att = data.attendance || {};
+  const res = data.reservations || {};
+  const ALL_SLOTS = ['am','pm','eve','exe','rbl','match'];
+
+  // 全練習セッション（日付+スロット）を収集
+  const practiceSessions = [];
+  const matchSessions = { exe: [], rbl: [] };
+  Object.keys(res).sort().forEach(ds => {
+    Object.keys(res[ds]).forEach(sid => {
+      if (!ALL_SLOTS.includes(sid)) return;
+      const isMatchSlot = ['exe','rbl','match'].includes(sid);
+      if (isMatchSlot) {
+        if (sid === 'exe') matchSessions.exe.push(ds);
+        else if (sid === 'rbl') matchSessions.rbl.push(ds);
+      } else {
+        practiceSessions.push({ ds, sid });
+      }
+    });
+  });
+
+  // 参加カウント集計
+  const countFor = (name) => {
+    let practice = 0, exe = 0, rbl = 0;
+    practiceSessions.forEach(({ ds, sid }) => {
+      if ((att[ds]?.[sid] || []).includes(name)) practice++;
+    });
+    matchSessions.exe.forEach(ds => {
+      if ((att[ds]?.exe || []).includes(name)) exe++;
+    });
+    matchSessions.rbl.forEach(ds => {
+      if ((att[ds]?.rbl || []).includes(name)) rbl++;
+    });
+    return { practice, exe, rbl };
+  };
+
+  const totalPractice = practiceSessions.length;
+  const totalExe = matchSessions.exe.length;
+  const totalRbl = matchSessions.rbl.length;
+
+  if (_amTab === 'players' || _amTab === 'fo') {
+    const names = _amTab === 'players' ? PLAYERS : FRONT_OFFICE;
+    const rows = names.map(name => {
+      const c = countFor(name);
+      return { name, ...c,
+        practicePct: totalPractice > 0 ? Math.round(c.practice/totalPractice*100) : 0,
+        exePct: totalExe > 0 ? Math.round(c.exe/totalExe*100) : 0,
+        rblPct: totalRbl > 0 ? Math.round(c.rbl/totalRbl*100) : 0,
+      };
+    }).sort((a,b) => b.practice - a.practice);
+
+    const tagCls = _amTab === 'players' ? 'player' : 'fo';
+    const totalAtt = rows.reduce((s,r) => s+r.practice, 0);
+    const avgPct = totalPractice > 0 && rows.length > 0
+      ? Math.round(totalAtt / rows.length / totalPractice * 100) : 0;
+    const mostActive = rows[0]?.name || '-';
+
+    let html = `<div class="am-summary-grid">
+      <div class="am-stat-card"><div class="sc-val">${totalPractice}</div><div class="sc-lbl">練習セッション総数</div></div>
+      <div class="am-stat-card"><div class="sc-val">${avgPct}%</div><div class="sc-lbl">平均参加率</div></div>
+      <div class="am-stat-card"><div class="sc-val" style="font-size:14px">${mostActive}</div><div class="sc-lbl">最多参加</div></div>
+    </div>`;
+
+    html += `<div class="am-section-title">練習参加状況</div>
+    <table class="am-table">
+      <thead><tr>
+        <th>名前</th><th>参加回数</th><th style="min-width:100px">参加率</th>
+        ${totalExe>0?'<th>EXE</th>':''}
+        ${totalRbl>0?'<th>RBL</th>':''}
+      </tr></thead><tbody>`;
+    rows.forEach(r => {
+      const barCls = r.practicePct >= 70 ? '' : r.practicePct >= 40 ? 'mid' : 'low';
+      html += `<tr>
+        <td><span class="am-tag ${tagCls}">${r.name}</span></td>
+        <td style="font-family:'DM Mono',monospace">${r.practice} / ${totalPractice}</td>
+        <td><div style="display:flex;align-items:center;gap:6px">
+          <div class="am-bar-wrap"><div class="am-bar ${barCls}" style="width:${r.practicePct}%"></div></div>
+          <span class="am-pct" style="color:${barCls===''?'#51cf66':barCls==='mid'?'#ffd43b':'#ff8787'}">${r.practicePct}%</span>
+        </div></td>
+        ${totalExe>0?`<td style="font-family:'DM Mono',monospace">${r.exe}/${totalExe} <span style="color:var(--sub);font-size:10px">(${r.exePct}%)</span></td>`:''}
+        ${totalRbl>0?`<td style="font-family:'DM Mono',monospace">${r.rbl}/${totalRbl} <span style="color:var(--sub);font-size:10px">(${r.rblPct}%)</span></td>`:''}
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+
+  } else if (_amTab === 'sessions') {
+    // セッション別: 各練習日に何人参加したか
+    const sessionRows = practiceSessions.map(({ ds, sid }) => {
+      const d = new Date(ds+'T00:00:00');
+      const names = att[ds]?.[sid] || [];
+      const pCount = names.filter(n => PLAYERS.includes(n)).length;
+      const fCount = names.filter(n => FRONT_OFFICE.includes(n)).length;
+      return { ds, sid, d, names, pCount, fCount };
+    }).sort((a,b) => new Date(a.ds)-new Date(b.ds));
+
+    const DOW_JP_S2 = ['日','月','火','水','木','金','土'];
+    const avgP = sessionRows.length > 0
+      ? Math.round(sessionRows.reduce((s,r)=>s+r.pCount,0)/sessionRows.length*10)/10 : 0;
+
+    let html = `<div class="am-summary-grid">
+      <div class="am-stat-card"><div class="sc-val">${totalPractice}</div><div class="sc-lbl">練習セッション数</div></div>
+      <div class="am-stat-card"><div class="sc-val">${avgP}</div><div class="sc-lbl">1回平均参加選手数</div></div>
+      <div class="am-stat-card"><div class="sc-val">${PLAYERS.length}</div><div class="sc-lbl">登録選手数</div></div>
+    </div>`;
+
+    html += `<div class="am-section-title">セッション別参加人数</div>
+    <table class="am-table">
+      <thead><tr><th>日付</th><th>時間帯</th><th>選手</th><th>FO</th><th>参加者</th></tr></thead><tbody>`;
+    sessionRows.forEach(r => {
+      const dow = r.d.getDay();
+      const slotLabel = s.slotLabels[r.sid] || r.sid;
+      const dateStr = `${r.d.getMonth()+1}/${r.d.getDate()} (${DOW_JP_S2[dow]})`;
+      const nameTags = r.names.map(n => {
+        const cls = FRONT_OFFICE.includes(n) ? 'fo' : 'player';
+        return `<span class="am-tag ${cls}">${n}</span>`;
+      }).join(' ');
+      html += `<tr>
+        <td style="font-family:'DM Mono',monospace;white-space:nowrap">${dateStr}</td>
+        <td>${slotLabel}</td>
+        <td style="font-family:'DM Mono',monospace">${r.pCount}</td>
+        <td style="font-family:'DM Mono',monospace">${r.fCount}</td>
+        <td style="max-width:200px;line-height:1.8">${nameTags || '<span style="color:var(--muted);font-size:10px">なし</span>'}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+}
+
+let _detailPending = null;
+
+function openDetailDirect(ds, sid, r, dt) {
+  // _allDates に存在するか探す、なければ仮データで表示
+  const allDates = window._allDates || [];
+  const idx = allDates.findIndex(x => x.ds === ds && x.sid === sid && x.r === r);
+  if (idx >= 0) {
+    openDetail(ds, sid, idx);
+    return;
+  }
+  // _allDatesにない場合（過去日など）は直接構築
+  const s = t();
+  const fi = FAC_BASE.findIndex(x => x.id === r.facId);
+  const fname = fi >= 0 ? s.facilities[fi] : '';
+  const isMatch = r.purpose === '試合' || r.purpose === 'Match';
+  // 一時的にallDatesに追加してopenDetail呼び出し
+  const dayAtt = (data.attendance||{})[ds]||{};
+  const uniqP = new Set(), uniqF = new Set();
+  ['am','pm','eve','exe','rbl','match'].forEach(sl => {
+    (dayAtt[sl]||[]).forEach(n => { if(FRONT_OFFICE.includes(n)) uniqF.add(n); else uniqP.add(n); });
+  });
+  const tempIdx = allDates.length;
+  allDates.push({ ds, d: dt, sid, r, fname, isMatch, pCount: uniqP.size, fCount: uniqF.size });
+  openDetail(ds, sid, tempIdx);
+}
+
+function openDetail(ds, sid, idx) {
+  const s = t();
+  const item = (window._allDates || [])[idx];
+  if (!item) return;
+  const { d, r, fname, isMatch } = item;
+  const DOW_JP_S = ['日','月','火','水','木','金','土'];
+  const DOW_EN_S = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dow = d.getDay();
+  const dowLabel = lang==='ja' ? DOW_JP_S[dow] : DOW_EN_S[dow];
+  const dowCls = dow===0?'sun':dow===6?'sat':'wkd';
+
+  // Title
+  const purpose = lang==='en' ? (r.purpose==='チーム練習'?'Team Practice':r.purpose==='個人練習'?'Solo Practice':r.purpose==='試合'?'Match':r.purpose) : r.purpose;
+  const slotLabel = s.slotLabels[sid] || sid;
+  const title = isMatch ? (r.memo || fname) : `${purpose} · ${fname}`;
+  const titleEl = document.getElementById('dm-title');
+  titleEl.textContent = (isMatch ? '⚔ ' : '') + title;
+  titleEl.className = isMatch ? 'is-match' : '';
+
+  // Date row
+  const dateStr = lang==='ja'
+    ? `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`
+    : `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  document.getElementById('dm-date-row').innerHTML =
+    `${dateStr} <span class="dm-dow ${dowCls}">${dowLabel}</span> <span style="color:var(--muted)">${slotLabel}</span>`;
+
+  // Body
+  const fi = FAC_BASE.findIndex(x => x.id === r.facId);
+  const f = fi >= 0 ? FAC_BASE[fi] : null;
+  let bodyHtml = '';
+
+  // 施設
+  if (f && fname) {
+    bodyHtml += `<div class="dm-row">
+      <div class="dm-label">${lang==='ja'?'施設':'Venue'}</div>
+      <div class="dm-value"><span class="dm-fac-chip" style="background:${f.bg};color:${f.fg};border-left-color:${f.bd}">${fname}</span></div>
+    </div>`;
+  }
+
+  // 用途（試合以外）
+  if (!isMatch) {
+    bodyHtml += `<div class="dm-row">
+      <div class="dm-label">${lang==='ja'?'用途':'Type'}</div>
+      <div class="dm-value">${purpose}</div>
+    </div>`;
+  }
+
+  // メモ
+  if (r.memo) {
+    bodyHtml += `<div class="dm-row">
+      <div class="dm-label">${lang==='ja'?'メモ':'Notes'}</div>
+      <div class="dm-value">${r.memo}</div>
+    </div>`;
+  }
+
+  // 備考
+  const note = (data.notes||{})[ds]||'';
+  if (note) {
+    bodyHtml += `<div class="dm-row">
+      <div class="dm-label">${lang==='ja'?'備考':'Memo'}</div>
+      <div class="dm-value">${note}</div>
+    </div>`;
+  }
+
+  // 参加者
+  const dayAtt = (data.attendance||{})[ds]||{};
+  const slotAtts = dayAtt[sid] || [];
+  const players = slotAtts.filter(n => !FRONT_OFFICE.includes(n));
+  const fo = slotAtts.filter(n => FRONT_OFFICE.includes(n));
+  bodyHtml += `<div class="dm-row">
+    <div class="dm-label">${lang==='ja'?'参加者':'Attendees'}</div>
+    <div class="dm-value">`;
+  if (slotAtts.length === 0) {
+    bodyHtml += `<span class="dm-empty-att">${lang==='ja'?'まだ参加表明なし':'No attendees yet'}</span>`;
+  } else {
+    bodyHtml += `<div class="dm-att-list">`;
+    players.forEach(n => { bodyHtml += `<span class="dm-att-player">✓ ${n}</span>`; });
+    fo.forEach(n => { bodyHtml += `<span class="dm-att-fo">✓ ${n}</span>`; });
+    bodyHtml += `</div>`;
+    const pCount = players.length, fCount = fo.length;
+    const parts = [];
+    if (pCount) parts.push(lang==='ja'?`選手${pCount}名`:`${pCount} players`);
+    if (fCount) parts.push(`FO ${fCount}`);
+    bodyHtml += `<div style="font-size:10px;color:var(--sub);margin-top:4px">${parts.join(' / ')}</div>`;
+  }
+  bodyHtml += `</div></div>`;
+
+  document.getElementById('dm-body').innerHTML = bodyHtml;
+
+  // 参加ボタン
+  const attBtn = document.getElementById('dm-att-btn');
+  attBtn.textContent = lang==='ja' ? '参加する ✓' : 'Join ✓';
+  attBtn.style.display = '';
+  _detailPending = { ds, sid, dt: d, slotLabel };
+
+  // 閉じるボタン
+  document.getElementById('t-dm-close').textContent = lang==='ja' ? '閉じる' : 'Close';
+
+  document.getElementById('detailOv').classList.add('open');
+}
+
+function openAttFromDetail() {
+  if (!_detailPending) return;
+  closeModal('detailOv');
+  openAttModal(_detailPending.ds, _detailPending.sid, _detailPending.dt, _detailPending.slotLabel);
+}
+
 function renderSidePanel() {
   const el = document.getElementById('scheduleList');
   if (!el) return;
@@ -1296,13 +1709,14 @@ function renderSidePanel() {
   const today = new Date(); today.setHours(0,0,0,0);
 
   // Collect all future dates with events
-  const allDates = [];
+  window._allDates = [];
+  const allDates = window._allDates;
   const res = data.reservations || {};
   Object.keys(res).sort().forEach(ds => {
     const d = new Date(ds + 'T00:00:00');
     if (d < today) return;
     const slots = res[ds];
-    Object.keys(slots).forEach(sid => {
+    Object.keys(slots).filter(sid => ['am','pm','eve','exe','rbl','match'].includes(sid)).forEach(sid => {
       (slots[sid] || []).forEach(r => {
         const fi = FAC_BASE.findIndex(x => x.id === r.facId);
         const fname = fi >= 0 ? s.facilities[fi] : '';
@@ -1310,7 +1724,7 @@ function renderSidePanel() {
         // attendance count for this day
         const dayAtt = (data.attendance || {})[ds] || {};
         const uniqP = new Set(), uniqF = new Set();
-        SLOT_IDS.forEach(sl => { (dayAtt[sl]||[]).forEach(n => { if(FRONT_OFFICE.includes(n)) uniqF.add(n); else uniqP.add(n); }); });
+        ['am','pm','eve','exe','rbl','match'].forEach(sl => { (dayAtt[sl]||[]).forEach(n => { if(FRONT_OFFICE.includes(n)) uniqF.add(n); else uniqP.add(n); }); });
         allDates.push({ ds, d, sid, r, fname, isMatch, pCount: uniqP.size, fCount: uniqF.size });
       });
     });
@@ -1347,8 +1761,9 @@ function renderSidePanel() {
     const attHtml = attParts.length
       ? `<div class="sch-att">${attParts.map(p=>`<span class="sch-att-pill">${p}</span>`).join('')}</div>`
       : '';
-    html += `<div class="sch-item">
-      <div class="sch-date">${dateStr}<span class="sch-dow ${dowCls}">${dowLabel}</span><span style="font-size:9px;color:var(--muted)">${slotLabel}</span></div>
+    const itemIdx = allDates.indexOf(allDates.find(x=>x.ds===ds&&x.sid===sid&&x.r===r));
+    html += `<div class="sch-item" onclick="openDetail('${ds}','${sid}',${allDates.findIndex(x=>x.ds===ds&&x.sid===sid&&x.r===r)})" style="cursor:pointer">
+      <div class="sch-date">${dateStr}<span class="sch-dow ${dowCls}">${dowLabel}</span><span style="font-size:9px;color:var(--muted)">${slotLabel}</span><span style="margin-left:auto;font-size:9px;color:var(--muted)">›</span></div>
       <div class="sch-title${isMatch?' is-match':''}">${isMatch?'⚔ ':''}${title}</div>
       ${r.memo && !isMatch ? `<div class="sch-sub">${r.memo}</div>` : ''}
       ${attHtml}
