@@ -62,11 +62,14 @@ header { background: linear-gradient(180deg,#0f1520,var(--bg)); border-bottom: 1
 
 /* LANG SWITCH */
 .lang-switch { display: flex; background: var(--surf3); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
-.account-sel-wrap { display: flex; align-items: center; gap: 6px; background: var(--surf2); border: 1px solid var(--border); border-radius: var(--r); padding: 3px 8px 3px 10px; }
-.account-sel-wrap .acct-icon { font-size: 13px; flex-shrink: 0; }
-.account-sel-wrap select { background: none; border: none; color: var(--text); font-size: 11px; font-weight: 700; font-family: 'Noto Sans JP',sans-serif; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; padding-right: 14px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%237a8fa8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0 center; min-width: 80px; max-width: 140px; }
-.account-sel-wrap.logged-in { border-color: var(--gold2); background: var(--gold-dim); }
-.account-sel-wrap.logged-in select { color: var(--gold); }
+.account-sel-wrap { display: flex; align-items: center; gap: 7px; background: var(--surf3); border: 2px solid var(--border); border-radius: 20px; padding: 4px 12px 4px 10px; transition: all .15s; }
+.account-sel-wrap .acct-icon { font-size: 14px; flex-shrink: 0; }
+.account-sel-wrap select { background: transparent; border: none; color: var(--sub); font-size: 12px; font-weight: 700; font-family: 'Noto Sans JP',sans-serif; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; padding-right: 16px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%237a8fa8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0 center; min-width: 70px; max-width: 130px; }
+.account-sel-wrap select option { background: #1a2235; color: #e2eaf6; }
+.account-sel-wrap select optgroup { background: #131929; color: #7a8fa8; font-size: 10px; }
+.account-sel-wrap.logged-in { border-color: var(--gold); background: rgba(240,192,64,.15); box-shadow: 0 0 10px rgba(240,192,64,.2); }
+.account-sel-wrap.logged-in select { color: var(--gold); font-size: 13px; }
+.account-sel-wrap.logged-in .acct-icon { filter: none; }
 .lang-btn { background: none; border: none; color: var(--sub); padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: .06em; transition: all .12s; font-family: 'Noto Sans JP',sans-serif; }
 .lang-btn.active { background: var(--gold); color: #0b0f18; }
 .lang-btn:not(.active):hover { color: var(--text); }
@@ -393,6 +396,13 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
       </div>
     </div>
     <span class="badge view" id="modeBadge">👁 閲覧モード</span>
+    <!-- Account selector - prominent, next to mode badge -->
+    <div class="account-sel-wrap" id="acctWrap">
+      <span class="acct-icon">👤</span>
+      <select id="acctSel" onchange="setAccount(this.value)">
+        <option value="">ゲスト</option>
+      </select>
+    </div>
     <div class="nav-row">
       <div class="sync-row"><span class="sdot ok" id="sdot"></span><span id="stxt">Ready</span></div>
       <div class="mnav">
@@ -402,13 +412,6 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
       </div>
       <button class="btn-s" id="t-today" onclick="goToday()">今月</button>
       <button class="btn-s" id="t-share-btn" onclick="toggleShare()">🔗 共有</button>
-      <!-- Account selector -->
-      <div class="account-sel-wrap" id="acctWrap">
-        <span class="acct-icon">👤</span>
-        <select id="acctSel" onchange="setAccount(this.value)">
-          <option value="">ゲスト</option>
-        </select>
-      </div>
       <button class="btn-s" id="editBtn" onclick="openEditModal()">✏️ 編集モード</button>
       <button class="btn-s" id="analyticsBtn" onclick="openAnalytics()" style="display:none">📊 分析</button>
       <!-- View toggle -->
