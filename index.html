@@ -318,6 +318,63 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
   .month-view-container { display: block; }
 }
 </style>
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDwTJXAKC_wdcTuqNNw00s4tt3USDlVWCw",
+    authDomain: "sunrise-calendar-df84a.firebaseapp.com",
+    databaseURL: "https://sunrise-calendar-df84a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "sunrise-calendar-df84a",
+    storageBucket: "sunrise-calendar-df84a.firebasestorage.app",
+    messagingSenderId: "271924412120",
+    appId: "1:271924412120:web:9b69d23f2c071c239fe1ad"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const DB_REF = 'sunrise_cal';
+
+  // Firebase経由でデータ読み込み
+  window.firebaseLoadData = async function() {
+    try {
+      const snapshot = await get(ref(db, DB_REF));
+      if (snapshot.exists()) {
+        return snapshot.val();
+      }
+      return null;
+    } catch(e) {
+      console.error('Firebase load error:', e);
+      return null;
+    }
+  };
+
+  // Firebase経由でデータ保存
+  window.firebaseSaveData = async function(data) {
+    try {
+      await set(ref(db, DB_REF), data);
+      return true;
+    } catch(e) {
+      console.error('Firebase save error:', e);
+      return false;
+    }
+  };
+
+  // リアルタイム同期: 他のユーザーの変更を検知
+  window.firebaseOnChange = function(callback) {
+    onValue(ref(db, DB_REF), (snapshot) => {
+      if (snapshot.exists()) {
+        callback(snapshot.val());
+      }
+    });
+  };
+
+  // Firebase準備完了を通知
+  window._firebaseReady = true;
+  if (window._firebaseReadyCallback) window._firebaseReadyCallback();
+</script>
 </head>
 <body>
 
@@ -772,9 +829,19 @@ function applyStrings() {
 // ============================================================
 //  STORAGE (localStorage for standalone HTML)
 // ============================================================
-function loadData() {
+async function loadData() {
   setSyncing('busy', t().syncLoading);
   try {
+    // Firebase から読み込み
+    if (window.firebaseLoadData) {
+      const fbData = await window.firebaseLoadData();
+      if (fbData) {
+        data = fbData;
+        setSyncing('ok', t().syncReady);
+        return;
+      }
+    }
+    // Firebase が未準備の場合はlocalStorageにフォールバック
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) data = JSON.parse(raw);
     setSyncing('ok', t().syncReady);
@@ -782,9 +849,18 @@ function loadData() {
     setSyncing('ok', t().syncReady);
   }
 }
-function saveData() {
+async function saveData() {
   setSyncing('busy', t().syncSaving);
   try {
+    // Firebase に保存
+    if (window.firebaseSaveData) {
+      const ok = await window.firebaseSaveData(data);
+      if (ok) {
+        setSyncing('ok', t().syncSaved);
+        return;
+      }
+    }
+    // フォールバック: localStorage
     localStorage.setItem(STORE_KEY, JSON.stringify(data));
     setSyncing('ok', t().syncSaved);
   } catch(e) {
@@ -1772,8 +1848,14 @@ function renderSidePanel() {
   el.innerHTML = html;
 }
 
-(function init() {
+async function startApp() {
   const n = new Date(); cy = n.getFullYear(); cmo = n.getMonth();
+  currentWeekStart = getWeekStart(n);
+  if (window.innerWidth <= 768) {
+    viewMode = 'week';
+    document.getElementById('btnMonth').classList.remove('active');
+    document.getElementById('btnWeek').classList.add('active');
+  }
   // データバージョン管理: バージョンが変わったら予約・試合データを自動更新（参加表明は保持）
   const DATA_VERSION = 'v4';
   const INITIAL_DATA = {"reservations":{"2026-04-01":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-02":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-04":{"eve":[{"facId":"d","purpose":"チーム練習","memo":"男女合同練習"}]},"2026-04-08":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-04-09":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-14":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-15":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-04-16":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-19":{"am":[{"facId":"f","purpose":"チーム練習","memo":"秋山中学校体育館9:00～12:00"}],"pm":[{"facId":"f","purpose":"チーム練習","memo":"秋山中学校体育館13:00～17:00"}],"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-04-20":{"am":[{"facId":"a","purpose":"チーム練習","memo":"9:00～12:00 上野原合宿"}],"pm":[{"facId":"d","purpose":"チーム練習","memo":"13:00～17:00 上野原合宿"}]},"2026-04-21":{"am":[{"facId":"a","purpose":"チーム練習","memo":"9:00～12:00  上野原合宿"}],"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-22":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-04-23":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-05":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-06":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-07":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-12":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-13":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-05-14":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-19":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-20":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-21":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-26":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-27":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-05-28":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-06-02":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-06-03":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-06-04":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-06-09":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-06-10":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-06-11":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-06-16":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-06-17":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-06-18":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-06-23":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-06-24":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-06-25":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-07-01":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-07-02":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-07-04":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND4 · 熊本城（熊本）"}]},"2026-07-07":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-07-08":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-07-09":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-07-14":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-07-15":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-07-16":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-07-21":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-07-22":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-07-23":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-07-28":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-07-29":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND5 FINAL · 博多駅前（福岡）"}]},"2026-07-30":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND5 FINAL · 博多駅前（福岡）"}]},"2026-05-16":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND1 · ワテラス（東京/千代田）"}]},"2026-05-30":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND2 · キャンパスクエア（ユニバードーム）（兵庫/姫路）"}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND1 · 歌舞伎町（東京）"}]},"2026-06-13":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND3 · 恩田スポーツパーク（山口/宇部）"}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND2 · 名古屋城（愛知）"}]},"2026-06-14":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND3 · 恩田スポーツパーク（山口/宇部）"}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND2 · 名古屋城（愛知）"}]},"2026-06-20":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND4 · オアシス21 銀河の広場（愛知/名古屋）"}]},"2026-07-18":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND5 · FLATHACHINAH E（青森/八戸）"}]},"2026-07-25":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND6 · FLATHACHINAH E（青森/八戸）"}]},"2026-07-26":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND6 · FLATHACHINAH E（青森/八戸）"}]},"2026-08-16":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND7 · 松下公園総合体育館（千葉/印西）"}]},"2026-09-05":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND8 · ひろしまゲートパーク（広島/広島）"}]},"2026-10-03":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE PLAYOFF/ROUND9 · グラングリーン大阪 ロートハートスクエアうめきた（大阪/大阪）"}]},"2026-10-04":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE PLAYOFF/ROUND9 · グラングリーン大阪 ロートハートスクエアうめきた（大阪/大阪）"}]},"2026-05-31":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND1 · 歌舞伎町（東京）"}]},"2026-06-27":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND3 · 岡崎公園or三条（京都）"}]},"2026-06-28":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND3 · 岡崎公園or三条（京都）"}]},"2026-07-05":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND4 · 熊本城（熊本）"}]},"2026-08-08":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL チャレンジャー · 上野原市役所（山梨/上野原）"}]},"2026-08-09":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL チャレンジャー · 上野原市役所（山梨/上野原）"}]}},"notes":{},"attendance":{}};
@@ -1798,7 +1880,7 @@ function renderSidePanel() {
     localStorage.setItem('sunrise_cal', JSON.stringify(merged));
     localStorage.setItem('sunrise_cal_version', DATA_VERSION);
   }
-  loadData();
+  await loadData();
   applyStrings();
   render();
   renderSidePanel();
@@ -1810,7 +1892,27 @@ function renderSidePanel() {
       hdrInner.style.transform = `translateX(-${wrap.scrollLeft}px)`;
     });
   }
-})();
+
+  // リアルタイム同期: 他のユーザーの更新を自動反映
+  if (window.firebaseOnChange) {
+    let isFirstCall = true;
+    window.firebaseOnChange((newData) => {
+      if (isFirstCall) { isFirstCall = false; return; } // 初回は無視
+      data = newData;
+      render();
+      renderSidePanel();
+      setSyncing('ok', t().syncSaved);
+    });
+  }
+}
+
+// Firebase準備完了後に起動
+if (window._firebaseReady) {
+  startApp();
+} else {
+  window._firebaseReadyCallback = startApp;
+  setTimeout(() => { if (!window._firebaseReady) startApp(); }, 3000);
+}
 </script>
 </body>
 </html>
