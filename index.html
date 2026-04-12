@@ -71,7 +71,7 @@ header { background: linear-gradient(180deg,#0f1520,var(--bg)); border-bottom: 1
 .acct-btn.open .acct-arrow { transform: rotate(180deg); }
 .acct-btn.logged-in { border-color: var(--gold); background: rgba(240,192,64,.15); box-shadow: 0 0 12px rgba(240,192,64,.25); }
 .acct-btn.logged-in .acct-name { color: var(--gold); font-size: 13px; }
-.acct-dropdown { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: var(--surf2); border: 1px solid var(--border); border-radius: 10px; min-width: 160px; box-shadow: 0 8px 32px rgba(0,0,0,.6); z-index: 200; overflow: hidden; }
+.acct-dropdown { display: none; position: fixed; background: var(--surf2); border: 1px solid var(--border); border-radius: 10px; min-width: 180px; box-shadow: 0 8px 32px rgba(0,0,0,.8); z-index: 500; overflow-y: auto; max-height: 70vh; }
 .acct-dropdown.open { display: block; animation: mIn .14s ease; }
 .acct-group-label { font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; padding: 8px 14px 4px; }
 .acct-option { padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--text); cursor: pointer; transition: background .1s; font-family: 'Noto Sans JP',sans-serif; }
@@ -1150,6 +1150,18 @@ function toggleAcctDropdown() {
   const dd  = document.getElementById('acctDropdown');
   if (!btn || !dd) return;
   const isOpen = dd.classList.contains('open');
+  if (!isOpen) {
+    const rect = btn.getBoundingClientRect();
+    const ddWidth = 200;
+    // 右端が画面外に出ないよう調整
+    let left = rect.right - ddWidth;
+    if (left < 8) left = 8;
+    if (left + ddWidth > window.innerWidth - 8) left = window.innerWidth - ddWidth - 8;
+    dd.style.top  = (rect.bottom + 6) + 'px';
+    dd.style.left = left + 'px';
+    dd.style.right = 'auto';
+    dd.style.width = ddWidth + 'px';
+  }
   dd.classList.toggle('open', !isOpen);
   btn.classList.toggle('open', !isOpen);
 }
@@ -2210,6 +2222,17 @@ function toggleBoardPageAcct() {
   const dd  = document.getElementById('boardPageAcctDd');
   if (!btn||!dd) return;
   const isOpen = dd.classList.contains('open');
+  if (!isOpen) {
+    const rect = btn.getBoundingClientRect();
+    const ddWidth = 200;
+    let left = rect.right - ddWidth;
+    if (left < 8) left = 8;
+    if (left + ddWidth > window.innerWidth - 8) left = window.innerWidth - ddWidth - 8;
+    dd.style.top  = (rect.bottom + 6) + 'px';
+    dd.style.left = left + 'px';
+    dd.style.right = 'auto';
+    dd.style.width = ddWidth + 'px';
+  }
   dd.classList.toggle('open', !isOpen);
   btn.classList.toggle('open', !isOpen);
 }
