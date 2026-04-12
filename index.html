@@ -159,6 +159,7 @@ header { background: linear-gradient(180deg,#0f1520,var(--bg)); border-bottom: 1
 .day.out .dnum { color: var(--muted); }
 .note-prev { font-size: 9px; color: var(--sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; opacity: .7; }
 .att-count-badge { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 10px; white-space: nowrap; background: rgba(81,207,102,.12); color: #69db7c; border: 1px solid rgba(81,207,102,.25); flex-shrink: 0; }
+.absent-count-badge { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 10px; white-space: nowrap; background: rgba(255,107,107,.12); color: #ff8787; border: 1px solid rgba(255,107,107,.25); flex-shrink: 0; }
 .slots { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 3px 5px 4px; }
 .slot-row { display: flex; gap: 3px; min-height: 24px; }
 .slbl { font-size: 10px; font-weight: 700; flex-shrink: 0; display: grid; place-items: center; border-radius: 3px; padding: 2px 5px; min-width: 28px; }
@@ -184,6 +185,10 @@ header { background: linear-gradient(180deg,#0f1520,var(--bg)); border-bottom: 1
 .att-tag .rm:hover { opacity: 1; }
 .att-btn { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: rgba(81,207,102,.06); color: var(--sub); border: 1px dashed rgba(81,207,102,.2); cursor: pointer; transition: all .12s; font-family: 'Noto Sans JP',sans-serif; }
 .att-btn:hover,.att-btn.has { border-style: solid; background: rgba(81,207,102,.15); color: #69db7c; border-color: rgba(81,207,102,.4); }
+.absent-btn { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: rgba(255,107,107,.06); color: var(--sub); border: 1px dashed rgba(255,107,107,.2); cursor: pointer; transition: all .12s; font-family: 'Noto Sans JP',sans-serif; }
+.absent-btn:hover,.absent-btn.has-absent { border-style: solid; background: rgba(255,107,107,.15); color: #ff8787; border-color: rgba(255,107,107,.4); }
+.att-tag.absent { background: rgba(255,107,107,.12); color: #ff8787; border-color: rgba(255,107,107,.22); }
+.week-att-tag.absent { background: rgba(255,107,107,.12); color: #ff8787; border-color: rgba(255,107,107,.22); }
 .add-btn { width: 100%; background: none; border: 1px dashed var(--border); border-radius: 3px; color: var(--muted); font-size: 11px; padding: 3px 4px; cursor: pointer; transition: all .12s; font-family: 'Noto Sans JP',sans-serif; min-height: 20px; }
 .add-btn:hover { border-color: var(--gold2); color: var(--gold); background: var(--gold-dim); }
 .day.out .add-btn, .view-mode .add-btn, .view-mode .dx, .view-mode .rm { display: none !important; }
@@ -269,12 +274,40 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
 .dm-close-btn:hover { border-color: var(--sub); color: var(--text); }
 .sch-item { padding: 8px 14px; border-bottom: 1px solid var(--border2); cursor: pointer; transition: background .1s; }
 /* 掲示板 */
+/* 掲示板全画面 */
+.board-page { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 400; flex-direction: column; overflow: hidden; }
+.board-page.open { display: flex; }
+.board-page-header { background: linear-gradient(180deg,#0f1520,var(--bg)); border-bottom: 1px solid var(--border); padding: 13px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.board-page-header h2 { font-size: 15px; font-weight: 700; color: var(--gold); flex: 1; margin: 0; }
+.board-page-back { background: var(--surf2); border: 1px solid var(--border); color: var(--sub); padding: 6px 14px; border-radius: var(--r); font-size: 12px; cursor: pointer; font-family: 'Noto Sans JP',sans-serif; transition: all .12s; }
+.board-page-back:hover { border-color: var(--sub); color: var(--text); }
+.board-page-body { flex: 1; overflow-y: auto; padding: 0; display: flex; flex-direction: column; }
+.board-page-posts { flex: 1; overflow-y: auto; max-width: 680px; width: 100%; margin: 0 auto; padding: 8px 0 20px; }
+.board-page-posts::-webkit-scrollbar { width: 4px; }
+.board-page-posts::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.board-page-compose { max-width: 680px; width: 100%; margin: 0 auto; padding: 12px 20px 20px; border-top: 1px solid var(--border2); background: var(--surf3); flex-shrink: 0; }
+.board-page-post { padding: 14px 20px; border-bottom: 1px solid var(--border2); }
+.board-page-post:last-child { border-bottom: none; }
+.board-page-post .board-post-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.board-page-post .board-post-author { font-size: 12px; font-weight: 700; color: var(--gold); }
+.board-page-post .board-post-author.fo { color: #82b1ff; }
+.board-page-post .board-post-time { font-size: 10px; color: var(--sub); margin-left: auto; }
+.board-page-post .board-post-body { font-size: 13px; color: var(--text); line-height: 1.7; white-space: pre-wrap; }
+.board-page-post .board-post-delete { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; display: none; }
+.board-page-post:hover .board-post-delete { display: inline; }
+.board-page-post .board-post-delete:hover { color: #ff6b6b; }
 .board-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 300; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 20px 16px 40px; backdrop-filter: blur(6px); }
 .board-overlay.open { display: flex; }
 .board-modal { background: var(--surf2); border: 1px solid var(--border); border-radius: 14px; width: 520px; max-width: 100%; box-shadow: 0 24px 80px rgba(0,0,0,.7); margin: auto; overflow: hidden; }
 .board-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; gap: 10px; }
 .board-header h3 { font-size: 14px; font-weight: 700; color: var(--gold); flex: 1; margin: 0; }
 .board-close { background: none; border: 1px solid var(--border); color: var(--sub); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px; line-height: 28px; text-align: center; }
+.board-ack-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border2); }
+.board-ack-label { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+.board-ack-tag { font-size: 10px; padding: 1px 7px; border-radius: 10px; background: rgba(130,177,255,.1); color: #74c0fc; border: 1px solid rgba(130,177,255,.2); }
+.board-ack-btn { font-size: 10px; padding: 2px 10px; border-radius: 10px; background: none; border: 1px dashed rgba(130,177,255,.3); color: var(--sub); cursor: pointer; transition: all .12s; font-family: 'Noto Sans JP',sans-serif; }
+.board-ack-btn:hover { background: rgba(130,177,255,.1); color: #74c0fc; border-color: rgba(130,177,255,.5); border-style: solid; }
+.board-ack-btn.acked { background: rgba(130,177,255,.15); color: #74c0fc; border-style: solid; border-color: rgba(130,177,255,.4); }
 .board-posts { padding: 12px 0; max-height: 55vh; overflow-y: auto; }
 .board-posts::-webkit-scrollbar { width: 4px; }
 .board-posts::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -283,7 +316,7 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
 .board-post-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .board-post-author { font-size: 11px; font-weight: 700; color: var(--gold); }
 .board-post-author.fo { color: #82b1ff; }
-.board-post-time { font-size: 10px; color: var(--muted); margin-left: auto; }
+.board-post-time { font-size: 10px; color: var(--sub); margin-left: auto; }
 .board-post-body { font-size: 12px; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
 .board-post-delete { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; display: none; }
 .board-post:hover .board-post-delete { display: inline; }
@@ -597,6 +630,7 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
       <button class="am-tab active" onclick="switchAmTab('players')">選手</button>
       <button class="am-tab" onclick="switchAmTab('fo')">フロントオフィス</button>
       <button class="am-tab" onclick="switchAmTab('sessions')">練習・試合別</button>
+      <button class="am-tab" onclick="switchAmTab('absences')">欠席理由</button>
     </div>
     <div class="am-body" id="amBody"></div>
   </div>
@@ -622,6 +656,7 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
   <div class="board-modal">
     <div class="board-header">
       <h3>📣 <span id="t-board-title">お知らせ掲示板</span></h3>
+      <button class="board-close" onclick="openBoardPage()" style="width:auto;padding:0 10px;font-size:10px;color:var(--sub)" title="全画面で見る">⛶ 全画面</button>
       <button class="board-close" onclick="closeModal('boardOv')">✕</button>
     </div>
     <div class="board-posts" id="boardPosts"></div>
@@ -632,6 +667,54 @@ textarea.note-inp:focus { border-top-color: var(--gold2); color: var(--text); }
         <span class="board-char-count" id="boardCharCount">0 / 500</span>
         <button class="board-send-btn" onclick="postBoard()" id="t-board-send">投稿する</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Board full page -->
+<div class="board-page" id="boardPage">
+  <div class="board-page-header">
+    <button class="board-page-back" onclick="closeBoardPage()">← <span id="t-board-back">カレンダーに戻る</span></button>
+    <h2>📣 <span id="t-board-page-title">お知らせ掲示板</span></h2>
+    <div style="position:relative">
+      <div class="acct-btn" id="boardPageAcctBtn" onclick="toggleBoardPageAcct()" style="font-size:11px">
+        <span style="font-size:12px">👤</span>
+        <span id="boardPageAcctName" style="font-size:11px;font-weight:700;color:var(--sub)">ゲスト</span>
+        <span style="font-size:9px;color:var(--muted)">▼</span>
+      </div>
+      <div class="acct-dropdown" id="boardPageAcctDd" style="right:0"></div>
+    </div>
+  </div>
+  <div class="board-page-body">
+    <div class="board-page-posts" id="boardPagePosts"></div>
+    <div class="board-page-compose">
+      <div class="board-compose-author" id="boardPageAuthorLine">投稿者: <span id="boardPageAuthorName">ゲスト</span></div>
+      <textarea class="board-textarea" id="boardPageTextarea" rows="3" placeholder="メッセージを入力…" maxlength="500" oninput="updateBoardPageCount()" style="font-size:13px"></textarea>
+      <div class="board-send-row">
+        <span class="board-char-count" id="boardPageCharCount">0 / 500</span>
+        <button class="board-send-btn" onclick="postBoardPage()">投稿する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Absent reason modal -->
+<div class="overlay" id="absentOv" onclick="ovClose(event,'absentOv')">
+  <div class="modal">
+    <h3>✗ <span id="absentLbl">不参加</span></h3>
+    <div class="fg">
+      <label style="font-size:11px;color:var(--sub);display:block;margin-bottom:4px" id="t-absent-name-lbl">名前</label>
+      <select id="absentSel" style="width:100%;background:var(--surf3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:7px 10px;font-size:12px;font-family:'Noto Sans JP',sans-serif;outline:none">
+        <option value="">-- 選択 --</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label style="font-size:11px;color:var(--sub);display:block;margin-bottom:4px" id="t-absent-reason-lbl">理由（任意）</label>
+      <textarea id="absentReason" rows="3" placeholder="例：仕事、体調不良、遠征など" style="width:100%;background:var(--surf3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-size:12px;font-family:'Noto Sans JP',sans-serif;outline:none;resize:none;line-height:1.5"></textarea>
+    </div>
+    <div class="mfoot">
+      <button class="btn-cancel" onclick="closeModal('absentOv')" id="t-absent-cancel">キャンセル</button>
+      <button class="btn-join" onclick="saveAbsent()" id="t-absent-save" style="background:#7a1a1a">✗ 不参加を記録</button>
     </div>
   </div>
 </div>
@@ -704,8 +787,10 @@ const I18N = {
     unlock:        '解除する',
     addRes:        '+ 施設予約追加',
     notePh:        '備考…',
-    attJoin:       '参加する？',
+    attJoin:       '参加？',
     attCount:      (n) => `+${n}人参加`,
+    absentJoin:    '不参加',
+    absentCount:   (n) => `${n}名不参加`,
     editEnabled:   '編集モードに切り替わりました',
     wrongKey:      'パスワードが違います',
     attDup:        (n) => `${n}さんはすでに参加表明済みです`,
@@ -785,8 +870,10 @@ const I18N = {
     unlock:        'Unlock',
     addRes:        '+ Add Facility',
     notePh:        'Notes…',
-    attJoin:       'Attend?',
+    attJoin:       'Join?',
     attCount:      (n) => `+${n} attending`,
+    absentJoin:    'Not attending',
+    absentCount:   (n) => `${n} absent`,
     editEnabled:   'Switched to edit mode',
     wrongKey:      'Incorrect password',
     attDup:        (n) => `${n} has already marked attendance`,
@@ -833,8 +920,17 @@ const FAC_BASE = [
   { id:'f', bg:'#1a1e24', fg:'#9e9e9e', bd:'#6c757d' },
   { id:'j', bg:'#1a1500', fg:'#ffd700', bd:'#ffa500' },
 ];
-const PLAYERS = ['Abe','Chiba','Dewa','Hoshi','Kanekubo','Petar','Saito','Sakeki','Shimizu','Shinada','Teo'];
-const FRONT_OFFICE = ['Baba','Hasegawa','Hayashi','Machiyo','Omata','Onaga','Sachi','Shibata','Tachikawa','Tanitsuji'];
+const PLAYERS = ['Abe','Chiba','Dewa','Hoshi','Kanekubo','Petar','Saito','Saeki','Shimizu','Shinada','Teo'];
+const NAME_JA = {
+  'Abe':'阿部','Chiba':'千葉','Dewa':'出羽','Hoshi':'星','Kanekubo':'金久保',
+  'Petar':'ペタ','Saito':'斉藤','Saeki':'佐伯','Shimizu':'清水','Shinada':'品田',
+  'Teo':'テオ','Baba':'馬場','Hasegawa':'長谷川','Hayashi':'林','Machi':'真智',
+  'Omata':'小俣','Onaga':'翁長','Sachi':'沙智','Shibata':'柴田','Tachikawa':'立川','Tanitsuji':'谷辻'
+};
+function dispName(name) {
+  return (lang === 'ja' && NAME_JA[name]) ? NAME_JA[name] : name;
+}
+const FRONT_OFFICE = ['Baba','Hasegawa','Hayashi','Machi','Omata','Onaga','Sachi','Shibata','Tachikawa','Tanitsuji'];
 const SLOT_IDS = ['am','pm','eve'];
 const EDIT_KEY = 'sunrise2026';
 const STORE_KEY = 'sunrise_cal';
@@ -934,21 +1030,25 @@ function applyStrings() {
 async function loadData() {
   setSyncing('busy', t().syncLoading);
   try {
-    // Firebase から読み込み
     if (window.firebaseLoadData) {
       const fbData = await window.firebaseLoadData();
       if (fbData) {
         data = fbData;
+        // reservationsがない場合は空で初期化
+        if (!data.reservations) data.reservations = {};
+        if (!data.attendance)   data.attendance = {};
+        if (!data.absence)      data.absence = {};
+        if (!data.notes)        data.notes = {};
         setSyncing('ok', t().syncReady);
         return;
       }
     }
-    // Firebase が未準備の場合はlocalStorageにフォールバック
+    // Firebase未接続: localStorageにフォールバック
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) data = JSON.parse(raw);
     setSyncing('ok', t().syncReady);
   } catch(e) {
-    setSyncing('ok', t().syncReady);
+    setSyncing('err', t().syncError);
   }
 }
 async function saveData() {
@@ -1022,7 +1122,7 @@ function buildAccountSelect() {
   PLAYERS.forEach(name => {
     const item = document.createElement('div');
     item.className = 'acct-option' + (currentUser === name ? ' selected' : '');
-    item.textContent = name;
+    item.textContent = dispName(name);
     item.onclick = () => setAccount(name);
     dropdown.appendChild(item);
   });
@@ -1037,7 +1137,7 @@ function buildAccountSelect() {
   FRONT_OFFICE.forEach(name => {
     const item = document.createElement('div');
     item.className = 'acct-option' + (currentUser === name ? ' selected' : '');
-    item.textContent = name;
+    item.textContent = dispName(name);
     item.onclick = () => setAccount(name);
     dropdown.appendChild(item);
   });
@@ -1071,7 +1171,7 @@ function updateAccountUI() {
   if (!btn || !nameEl) return;
   if (currentUser) {
     btn.classList.add('logged-in');
-    nameEl.textContent = currentUser;
+    nameEl.textContent = dispName(currentUser);
   } else {
     btn.classList.remove('logged-in');
     nameEl.textContent = lang==='ja' ? 'ゲスト' : 'Guest';
@@ -1197,6 +1297,9 @@ function render() {
     g.appendChild(buildDay(new Date(cy, cmo+1, i), false));
 }
 
+function absentName(e) { return typeof e === 'string' ? e : e.name; }
+function absentReason(e) { return typeof e === 'string' ? '' : (e.reason || ''); }
+
 function hasMatch(ds) {
   const d = (data.reservations||{})[ds]||{};
   return !!(d['match']?.length || d['exe']?.length || d['rbl']?.length);
@@ -1265,36 +1368,36 @@ function buildDay(dt, inM) {
   dh.appendChild(dhLeft);
 
   // RIGHT: att-count badge + note preview (pushed to right)
-  const dhRight = document.createElement('div'); dhRight.className = 'date-hdr-right';
+  // 参加・不参加カウントを dhLeft（日付番号の右隣）に追加
   if (inM) {
     const dayAtt = data.attendance && data.attendance[ds] ? data.attendance[ds] : {};
-    const uniquePlayers = new Set();
-    const uniqueFront   = new Set();
-    SLOT_IDS.forEach(sid => {
-      (dayAtt[sid] || []).forEach(n => {
-        if (FRONT_OFFICE.includes(n)) uniqueFront.add(n);
-        else uniquePlayers.add(n);
-      });
+    const dayAbs = data.absence && data.absence[ds] ? data.absence[ds] : {};
+    const uniquePlayers = new Set(); const uniqueFront = new Set();
+    const uniqueAbsP = new Set(); const uniqueAbsF = new Set();
+    ['am','pm','eve','exe','rbl','match'].forEach(sid => {
+      (dayAtt[sid]||[]).forEach(n => { if(FRONT_OFFICE.includes(n)) uniqueFront.add(n); else uniquePlayers.add(n); });
+      (dayAbs[sid]||[]).forEach(e => { const n=absentName(e); if(FRONT_OFFICE.includes(n)) uniqueAbsF.add(n); else uniqueAbsP.add(n); });
     });
-    const pCount = uniquePlayers.size;
-    const fCount = uniqueFront.size;
+    const pCount = uniquePlayers.size, fCount = uniqueFront.size;
+    const apCount = uniqueAbsP.size, afCount = uniqueAbsF.size;
     if (pCount > 0 || fCount > 0) {
-      const acb = document.createElement('span');
-      acb.className = 'att-count-badge';
-      if (lang === 'ja') {
-        const parts = [];
-        if (pCount > 0) parts.push(`選手${pCount}名`);
-        if (fCount > 0) parts.push(`FO ${fCount}名`);
-        acb.textContent = '参加 ' + parts.join(' / ');
-      } else {
-        const parts = [];
-        if (pCount > 0) parts.push(`${pCount} players`);
-        if (fCount > 0) parts.push(`${fCount} FO`);
-        acb.textContent = parts.join(' / ');
-      }
-      dhRight.appendChild(acb);
+      const acb = document.createElement('span'); acb.className = 'att-count-badge';
+      const parts = [];
+      if (pCount > 0) parts.push(lang==='ja' ? `選手${pCount}` : `${pCount}P`);
+      if (fCount > 0) parts.push(`FO${fCount}`);
+      acb.textContent = (lang==='ja'?'参加 ':'✓ ') + parts.join('/');
+      dhLeft.appendChild(acb);
+    }
+    if (apCount > 0 || afCount > 0) {
+      const xcb = document.createElement('span'); xcb.className = 'absent-count-badge';
+      const xparts = [];
+      if (apCount > 0) xparts.push(lang==='ja' ? `選手${apCount}` : `${apCount}P`);
+      if (afCount > 0) xparts.push(`FO${afCount}`);
+      xcb.textContent = (lang==='ja'?'欠席 ':'✗ ') + xparts.join('/');
+      dhLeft.appendChild(xcb);
     }
   }
+  const dhRight = document.createElement('div'); dhRight.className = 'date-hdr-right';
   if (nv) { const np = document.createElement('div'); np.className = 'note-prev'; np.textContent = nv; dhRight.appendChild(np); }
   dh.appendChild(dhRight);
   cell.appendChild(dh);
@@ -1327,7 +1430,7 @@ function buildDay(dt, inM) {
       const purposeDisplay = lang === 'en' ? translatePurpose(r.purpose) : r.purpose;
       const label = r.purpose === '試合' || r.purpose === 'Match'
         ? `⚔ ${fname}${r.memo ? '·'+r.memo : ''}`
-        : `${fname}${purposeDisplay ? ' · '+purposeDisplay : ''}${r.memo ? ' · '+r.memo : ''}`;
+        : `${fname}${purposeDisplay ? ' · '+purposeDisplay : ''}`;
       chip.innerHTML = `<span class="rchip-txt">${label}</span>`;
       chip.onclick = (e) => { e.stopPropagation(); openDetailDirect(ds, sid, r, dt); };
       if (isEdit) {
@@ -1341,17 +1444,33 @@ function buildDay(dt, inM) {
     const ar = document.createElement('div'); ar.className = 'att-row';
     atts.forEach((name, ni) => {
       const tag = document.createElement('span'); tag.className = 'att-tag';
-      tag.innerHTML = `✓ ${name}`;
+      tag.innerHTML = `✓ ${dispName(name)}`;
       if (isEdit) {
         const rm = document.createElement('button'); rm.className = 'rm'; rm.textContent = '×';
         rm.onclick = e => { e.stopPropagation(); delAtt(ds, sid, ni); }; tag.appendChild(rm);
       }
       ar.appendChild(tag);
     });
-    // 参加ボタン: 施設予約がある or すでに参加者がいる場合のみ表示
-    if (inM && (ress.length > 0 || atts.length > 0)) {
+    // 不参加タグ
+    const absents = ((data.absence||{})[ds]||{})[sid]||[];
+    absents.forEach((entry, ni) => {
+      const aName = absentName(entry);
+      const aReason = absentReason(entry);
+      const tag = document.createElement('span'); tag.className = 'att-tag absent';
+      tag.title = aReason ? aReason : '';
+      tag.innerHTML = `✗ ${dispName(aName)}${aReason ? ' <span style="font-size:9px;opacity:.7">('+aReason+')</span>' : ''}`;
+      if (isEdit) {
+        const rm = document.createElement('button'); rm.className = 'rm'; rm.textContent = '×';
+        rm.onclick = e => { e.stopPropagation(); delAbsent(ds, sid, ni); }; tag.appendChild(rm);
+      }
+      ar.appendChild(tag);
+    });
+    // 参加・不参加ボタン: 施設予約がある or すでに参加/不参加者がいる場合のみ表示
+    if (inM && (ress.length > 0 || atts.length > 0 || absents.length > 0)) {
+      const iJoined  = currentUser && atts.includes(currentUser);
+      const iAbsent  = currentUser && absents.some(e=>absentName(e)===currentUser);
+      // 参加ボタン
       const ab = document.createElement('button');
-      const iJoined = currentUser && atts.includes(currentUser);
       ab.className = 'att-btn' + (atts.length ? ' has' : '') + (iJoined ? ' joined-me' : '');
       if (iJoined) {
         ab.textContent = lang==='ja' ? '✓ 参加済（取消）' : '✓ Joined (cancel)';
@@ -1361,6 +1480,17 @@ function buildDay(dt, inM) {
       }
       ab.onclick = () => openAttModal(ds, sid, dt, slotLabel);
       ar.appendChild(ab);
+      // 不参加ボタン
+      const xb = document.createElement('button');
+      xb.className = 'absent-btn' + (absents.length ? ' has-absent' : '');
+      if (iAbsent) {
+        xb.textContent = lang==='ja' ? '✗ 不参加済（取消）' : '✗ Absent (cancel)';
+        xb.style.cssText = 'border-style:solid;background:rgba(255,107,107,.25);color:#ff8787;border-color:rgba(255,107,107,.5)';
+      } else {
+        xb.textContent = absents.length ? s.absentCount(absents.length) : s.absentJoin;
+      }
+      xb.onclick = () => openAbsentModal(ds, sid, dt, slotLabel);
+      ar.appendChild(xb);
     }
     if (inM && isEdit) {
       const ab = document.createElement('button'); ab.className = 'add-btn';
@@ -1452,6 +1582,119 @@ function delRes(ds, sid, idx) {
 // ============================================================
 //  ATTENDANCE
 // ============================================================
+function openAbsentModal(ds, sid, dt, slotLabel) {
+  pAtt = { ds, sid, dt, slotLabel };
+  const s = t();
+  const label = s.dateLabel(dt.getMonth()+1, dt.getDate(), s.dow[dt.getDay()], slotLabel);
+  document.getElementById('absentLbl').textContent = label;
+  document.getElementById('absentReason').value = '';
+
+  // 名前セレクト構築
+  const sel = document.getElementById('absentSel');
+  sel.innerHTML = `<option value="">-- ${lang==='ja'?'選択':'Select'} --</option>`;
+  const grpP = document.createElement('optgroup');
+  grpP.label = lang==='ja'?'選手':'Players';
+  PLAYERS.forEach(name => { const o=document.createElement('option');o.value=name;o.textContent=dispName(name);grpP.appendChild(o); });
+  sel.appendChild(grpP);
+  const grpF = document.createElement('optgroup');
+  grpF.label = lang==='ja'?'フロントオフィス':'Front Office';
+  FRONT_OFFICE.forEach(name => { const o=document.createElement('option');o.value=name;o.textContent=dispName(name);grpF.appendChild(o); });
+  sel.appendChild(grpF);
+
+  // アカウント選択済みなら自動セット
+  if (currentUser) sel.value = currentUser;
+
+  // すでに不参加済みかチェック
+  const existingAbsents = (data.absence?.[ds]?.[sid]) || [];
+  const alreadyAbsent = currentUser && existingAbsents.some(e => absentName(e) === currentUser);
+  const existingEntry = alreadyAbsent ? existingAbsents.find(e => absentName(e) === currentUser) : null;
+
+  if (alreadyAbsent) {
+    // 取り消しモード
+    document.getElementById('absentLbl').textContent = label;
+    document.getElementById('t-absent-save').textContent = lang==='ja' ? '✗ 不参加を取り消す' : '✗ Cancel Absence';
+    document.getElementById('t-absent-save').style.background = '#555';
+    document.getElementById('absentReason').value = absentReason(existingEntry);
+    document.getElementById('absentReason').readOnly = true;
+    document.getElementById('absentReason').style.opacity = '0.5';
+  } else {
+    // 新規不参加モード
+    document.getElementById('absentLbl').textContent = label;
+    document.getElementById('t-absent-save').textContent = lang==='ja' ? '✗ 不参加を記録' : '✗ Mark Absent';
+    document.getElementById('t-absent-save').style.background = '#7a1a1a';
+    document.getElementById('absentReason').readOnly = false;
+    document.getElementById('absentReason').style.opacity = '1';
+  }
+
+  document.getElementById('absentOv').classList.add('open');
+  setTimeout(() => { if (!currentUser) sel.focus(); else if (!alreadyAbsent) document.getElementById('absentReason').focus(); }, 50);
+}
+
+function saveAbsent() {
+  const name = document.getElementById('absentSel').value;
+  const reason = document.getElementById('absentReason').value.trim();
+  if (!name) { document.getElementById('absentSel').focus(); return; }
+  if (!pAtt) return;
+  const { ds, sid } = pAtt;
+  if (!data.absence) data.absence = {};
+  if (!data.absence[ds]) data.absence[ds] = {};
+  if (!data.absence[ds][sid]) data.absence[ds][sid] = [];
+
+  // すでに不参加なら取り消し
+  const existing = data.absence[ds][sid];
+  const existIdx = existing.findIndex(e => (typeof e === 'string' ? e : e.name) === name);
+  if (existIdx >= 0) {
+    existing.splice(existIdx, 1);
+    if (!existing.length) delete data.absence[ds][sid];
+    if (!Object.keys(data.absence[ds]).length) delete data.absence[ds];
+    closeModal('absentOv'); saveData(); render();
+    showToast(lang==='ja' ? `${dispName(name)} の不参加を取り消しました` : `Cancelled absence for ${name}`);
+    return;
+  }
+  // 参加済みなら取り消し
+  if (data.attendance?.[ds]?.[sid]?.includes(name)) {
+    data.attendance[ds][sid] = data.attendance[ds][sid].filter(n => n !== name);
+    if (!data.attendance[ds][sid].length) delete data.attendance[ds][sid];
+    if (!Object.keys(data.attendance[ds]||{}).length) delete data.attendance[ds];
+  }
+  // {name, reason, ts} オブジェクトで保存
+  data.absence[ds][sid].push({ name, reason, ts: Date.now() });
+  closeModal('absentOv'); saveData(); render();
+  showToast(lang==='ja' ? `✗ ${dispName(name)} の不参加を記録しました` : `✗ Marked ${name} as absent`);
+}
+
+function saveAbsentDirect(name) {
+  if (!pAtt) return;
+  const { ds, sid } = pAtt;
+  if (!data.absence) data.absence = {};
+  if (!data.absence[ds]) data.absence[ds] = {};
+  if (!data.absence[ds][sid]) data.absence[ds][sid] = [];
+  if (data.absence[ds][sid].includes(name)) {
+    data.absence[ds][sid] = data.absence[ds][sid].filter(n => n !== name);
+    if (!data.absence[ds][sid].length) delete data.absence[ds][sid];
+    if (!Object.keys(data.absence[ds]).length) delete data.absence[ds];
+    saveData(); render();
+    showToast(lang==='ja' ? `${name} の不参加を取り消しました` : `Cancelled absence for ${name}`);
+    return;
+  }
+  // 参加済みなら参加を取り消してから不参加に
+  if (data.attendance?.[ds]?.[sid]?.includes(name)) {
+    data.attendance[ds][sid] = data.attendance[ds][sid].filter(n => n !== name);
+    if (!data.attendance[ds][sid].length) delete data.attendance[ds][sid];
+    if (!Object.keys(data.attendance[ds] || {}).length) delete data.attendance[ds];
+  }
+  data.absence[ds][sid].push(name);
+  saveData(); render();
+  showToast(lang==='ja' ? `✗ ${dispName(name)} の不参加を記録しました` : `✗ Marked ${name} as absent`);
+}
+
+function delAbsent(ds, sid, idx) {
+  data.absence[ds][sid].splice(idx, 1);
+  if (!data.absence[ds][sid].length) delete data.absence[ds][sid];
+  if (!Object.keys(data.absence[ds]).length) delete data.absence[ds];
+  saveData(); render();
+}
+
 function openAttModal(ds, sid, dt, slotLabel) {
   pAtt = { ds, sid, dt, slotLabel };
   // ログイン中ならワンクリックで参加
@@ -1479,17 +1722,32 @@ function saveAttDirect(name) {
     if (!data.attendance[ds][sid].length) delete data.attendance[ds][sid];
     if (!Object.keys(data.attendance[ds]).length) delete data.attendance[ds];
     saveData(); render();
-    showToast(lang==='ja' ? `${name} の参加を取り消しました` : `Cancelled attendance for ${name}`);
+    showToast(lang==='ja' ? `${dispName(name)} の参加を取り消しました` : `Cancelled attendance for ${name}`);
     return;
+  }
+  // 不参加が登録されていれば取り消す
+  if (data.absence?.[ds]?.[sid]?.includes(name)) {
+    data.absence[ds][sid] = data.absence[ds][sid].filter(n => n !== name);
+    if (!data.absence[ds][sid].length) delete data.absence[ds][sid];
+    if (!Object.keys(data.absence[ds]).length) delete data.absence[ds];
   }
   data.attendance[ds][sid].push(name);
   saveData(); render();
-  showToast(lang==='ja' ? `✓ ${name} の参加を記録しました` : `✓ Recorded attendance for ${name}`);
+  showToast(lang==='ja' ? `✓ ${dispName(name)} の参加を記録しました` : `✓ Recorded attendance for ${name}`);
 }
 function saveAtt() {
   if (!pAtt) return;
   const name = document.getElementById('attSel').value.trim();
   if (!name) { document.getElementById('attSel').focus(); return; }
+  // 不参加モードリセット
+  if (window._absenceMode) {
+    window._absenceMode = false;
+    document.getElementById('t-join').textContent = t().join;
+    document.getElementById('t-join').style.background = '';
+    closeModal('attOv');
+    saveAbsentDirect(name);
+    return;
+  }
   const { ds, sid } = pAtt;
   if (!data.attendance) data.attendance = {};
   if (!data.attendance[ds]) data.attendance[ds] = {};
@@ -1571,11 +1829,16 @@ document.addEventListener('click', e => {
     document.getElementById('acctDropdown')?.classList.remove('open');
     document.getElementById('acctBtn')?.classList.remove('open');
   }
+  const bpAcct = document.getElementById('boardPageAcctBtn');
+  if (bpAcct && !bpAcct.closest('[id="boardPage"]')?.contains(e.target) && !document.getElementById('boardPageAcctBtn')?.contains(e.target)) {
+    document.getElementById('boardPageAcctDd')?.classList.remove('open');
+    document.getElementById('boardPageAcctBtn')?.classList.remove('open');
+  }
 });
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape')
-    ['resOv','attOv','editOv','confirmOv','detailOv','analyticsOv','boardOv'].forEach(id => {
+    ['resOv','attOv','editOv','confirmOv','detailOv','analyticsOv','boardOv','absentOv'].forEach(id => {
       if (document.getElementById(id).classList.contains('open')) closeModal(id);
     });
   if (e.key === 'Enter') {
@@ -1619,6 +1882,26 @@ function renderWeekView() {
       const sb=document.createElement('span'); sb.className='wdh-sched sched-badge '+sched;
       sb.textContent = sched==='off'?'OFF':sched==='yamanashi'?(lang==='ja'?'山梨':'Yamanashi'):(lang==='ja'?'東京':'Tokyo');
       hdr.appendChild(sb);
+    }
+    // 週表示: 参加・不参加カウント
+    {
+      const wdAtt = (data.attendance||{})[ds]||{};
+      const wdAbs = (data.absence||{})[ds]||{};
+      const wuP=new Set(),wuF=new Set(),wuAP=new Set(),wuAF=new Set();
+      ['am','pm','eve','exe','rbl','match'].forEach(sl=>{
+        (wdAtt[sl]||[]).forEach(n=>{if(FRONT_OFFICE.includes(n))wuF.add(n);else wuP.add(n);});
+        (wdAbs[sl]||[]).forEach(e=>{const n=absentName(e);if(FRONT_OFFICE.includes(n))wuAF.add(n);else wuAP.add(n);});
+      });
+      if(wuP.size||wuF.size){
+        const ac=document.createElement('span');ac.className='wdh-att';
+        const pts=[];if(wuP.size)pts.push(lang==='ja'?`選手${wuP.size}`:`${wuP.size}P`);if(wuF.size)pts.push(`FO${wuF.size}`);
+        ac.textContent=(lang==='ja'?'参加 ':'✓ ')+pts.join('/');hdr.appendChild(ac);
+      }
+      if(wuAP.size||wuAF.size){
+        const xc=document.createElement('span');xc.style.cssText='font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,107,107,.12);color:#ff8787;border:1px solid rgba(255,107,107,.22);';
+        const xpts=[];if(wuAP.size)xpts.push(lang==='ja'?`選手${wuAP.size}`:`${wuAP.size}P`);if(wuAF.size)xpts.push(`FO${wuAF.size}`);
+        xc.textContent=(lang==='ja'?'欠席 ':'✗ ')+xpts.join('/');hdr.appendChild(xc);
+      }
     }
     // 週表示の試合バッジ
     ['exe','rbl'].forEach(leagueId => {
@@ -1672,7 +1955,7 @@ function renderWeekView() {
         chip.style.cursor='pointer';
         const purposeD=lang==='en'?translatePurpose(r.purpose):r.purpose;
         const isMatch=r.purpose==='試合'||r.purpose==='Match';
-        const label=isMatch?`⚔ ${r.memo||fname}`:`${fname}${purposeD?' · '+purposeD:''}${r.memo?' · '+r.memo:''}`;
+        const label=isMatch?`⚔ ${r.memo||fname}`:`${fname}${purposeD?' · '+purposeD:''}`;
         chip.innerHTML=`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${label}</span>`;
         chip.onclick=(e)=>{e.stopPropagation();openDetailDirect(ds,sid,r,dt);};
         if(isEdit){const dx=document.createElement('button');dx.className='dx';dx.textContent='×';dx.onclick=e=>{e.stopPropagation();delRes(ds,sid,ri);};chip.appendChild(dx);}
@@ -1682,23 +1965,34 @@ function renderWeekView() {
       // attendance
       const attRow=document.createElement('div');attRow.className='week-att-row';
       atts.forEach((name,ni)=>{
-        const tag=document.createElement('span');tag.className='week-att-tag';tag.innerHTML=`✓ ${name}`;
+        const tag=document.createElement('span');tag.className='week-att-tag';tag.innerHTML=`✓ ${dispName(name)}`;
         if(isEdit){const rm=document.createElement('button');rm.className='rm';rm.textContent='×';rm.onclick=e=>{e.stopPropagation();delAtt(ds,sid,ni);};tag.appendChild(rm);}
         attRow.appendChild(tag);
       });
-      // 参加ボタン: 施設予約がある or すでに参加者がいる場合のみ表示
-      if (ress.length > 0 || atts.length > 0) {
-        const iJoinedW = currentUser && atts.includes(currentUser);
+      const absentsW=((data.absence||{})[ds]||{})[sid]||[];
+      absentsW.forEach((entry,ni)=>{
+        const aName=absentName(entry); const aReason=absentReason(entry);
+        const tag=document.createElement('span');tag.className='week-att-tag absent';
+        tag.title=aReason||'';
+        tag.innerHTML=`✗ ${dispName(aName)}${aReason?` <span style="font-size:9px;opacity:.7">(${aReason})</span>`:''}`;
+        if(isEdit){const rm=document.createElement('button');rm.className='rm';rm.textContent='×';rm.onclick=e=>{e.stopPropagation();delAbsent(ds,sid,ni);};tag.appendChild(rm);}
+        attRow.appendChild(tag);
+      });
+      if (ress.length > 0 || atts.length > 0 || absentsW.length > 0) {
+        const iJoinedW=currentUser&&atts.includes(currentUser);
+        const iAbsentW=currentUser&&absentsW.some(e=>absentName(e)===currentUser);
         const ab=document.createElement('button');
         ab.className='att-btn'+(atts.length?' has':'')+(iJoinedW?' joined-me':'');
-        if(iJoinedW){
-          ab.textContent=lang==='ja'?'✓ 参加済（取消）':'✓ Joined (cancel)';
-          ab.style.cssText='border-style:solid;background:rgba(81,207,102,.25);color:#69db7c;border-color:rgba(81,207,102,.5)';
-        }else{
-          ab.textContent=atts.length?s.attCount(atts.length):s.attJoin;
-        }
+        if(iJoinedW){ab.textContent=lang==='ja'?'✓ 参加済（取消）':'✓ Joined (cancel)';ab.style.cssText='border-style:solid;background:rgba(81,207,102,.25);color:#69db7c;border-color:rgba(81,207,102,.5)';}
+        else{ab.textContent=atts.length?s.attCount(atts.length):s.attJoin;}
         ab.onclick=()=>openAttModal(ds,sid,dt,slotLabel);
         attRow.appendChild(ab);
+        const xb=document.createElement('button');
+        xb.className='absent-btn'+(absentsW.length?' has-absent':'');
+        if(iAbsentW){xb.textContent=lang==='ja'?'✗ 不参加済（取消）':'✗ Absent (cancel)';xb.style.cssText='border-style:solid;background:rgba(255,107,107,.25);color:#ff8787;border-color:rgba(255,107,107,.5)';}
+        else{xb.textContent=absentsW.length?s.absentCount(absentsW.length):s.absentJoin;}
+        xb.onclick=()=>openAbsentModal(ds,sid,dt,slotLabel);
+        attRow.appendChild(xb);
       }
       body.appendChild(attRow);
 
@@ -1779,6 +2073,39 @@ function updateBoardCount() {
   if (ta && ct) ct.textContent = `${ta.value.length} / 500`;
 }
 
+function formatBoardTime(ts, full) {
+  const dt = new Date(ts);
+  if (full) return `${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+  return `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+}
+
+function renderBoardPostHtml(p, idx, full) {
+  const isFO = FRONT_OFFICE.includes(p.author);
+  const isMe = p.author === currentUser;
+  const timeStr = formatBoardTime(p.ts, full);
+  const authorCls = isFO ? 'fo' : '';
+  const canDelete = isMe || isEdit;
+  const acks = p.acks || [];
+  const iAcked = currentUser && acks.includes(currentUser);
+  const ackBtnText = iAcked ? (lang==='ja'?'✓ 了解済':'✓ Acknowledged') : (lang==='ja'?'👍 了解':'👍 OK');
+  const ackTags = acks.map(n => `<span class="board-ack-tag">${dispName(n)}</span>`).join('');
+  const ackRow = `<div class="board-ack-row">
+    <span class="board-ack-label">${lang==='ja'?'了解:':'Ack:'}</span>
+    ${ackTags}
+    <button class="board-ack-btn${iAcked?' acked':''}" onclick="toggleAck(${idx})">${ackBtnText}</button>
+  </div>`;
+  return `<div class="${full?'board-page-post':'board-post'}">
+    <div class="board-post-header">
+      <span class="board-post-time" style="margin-left:0;margin-right:4px;color:#a0b4c8;font-weight:500">${timeStr}</span>
+      <span class="board-post-author ${authorCls}">${p.author || (lang==='ja'?'ゲスト':'Guest')}</span>
+      ${isFO ? `<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(130,177,255,.1);color:#82b1ff">FO</span>` : ''}
+      ${canDelete ? `<button class="board-post-delete" onclick="${full?'deleteBoardPagePost':'deletePost'}(${idx})">✕ 削除</button>` : ''}
+    </div>
+    <div class="board-post-body">${escHtml(p.body)}</div>
+    ${ackRow}
+  </div>`;
+}
+
 function renderBoardPosts() {
   const el = document.getElementById('boardPosts');
   if (!el) return;
@@ -1786,23 +2113,27 @@ function renderBoardPosts() {
     el.innerHTML = `<div class="board-empty">${lang==='ja'?'まだ投稿がありません':'No posts yet'}</div>`;
     return;
   }
-  el.innerHTML = _boardPosts.map((p, idx) => {
-    const isFO = FRONT_OFFICE.includes(p.author);
-    const isMe = p.author === currentUser;
-    const dt = new Date(p.ts);
-    const timeStr = `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
-    const authorCls = isFO ? 'fo' : '';
-    const canDelete = isMe || isEdit;
-    return `<div class="board-post">
-      <div class="board-post-header">
-        <span class="board-post-author ${authorCls}">${p.author || (lang==='ja'?'ゲスト':'Guest')}</span>
-        ${isFO ? `<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(130,177,255,.1);color:#82b1ff">FO</span>` : ''}
-        <span class="board-post-time">${timeStr}</span>
-        ${canDelete ? `<button class="board-post-delete" onclick="deletePost(${idx})">✕ 削除</button>` : ''}
-      </div>
-      <div class="board-post-body">${escHtml(p.body)}</div>
-    </div>`;
-  }).join('');
+  el.innerHTML = _boardPosts.map((p, idx) => renderBoardPostHtml(p, idx, false)).join('');
+}
+
+async function toggleAck(idx) {
+  if (!currentUser) {
+    showToast(lang==='ja' ? '名前を選択してから了解してください' : 'Please select your name first');
+    return;
+  }
+  if (!_boardPosts[idx]) return;
+  if (!_boardPosts[idx].acks) _boardPosts[idx].acks = [];
+  const acks = _boardPosts[idx].acks;
+  if (acks.includes(currentUser)) {
+    _boardPosts[idx].acks = acks.filter(n => n !== currentUser);
+    showToast(lang==='ja' ? '了解を取り消しました' : 'Acknowledgement removed');
+  } else {
+    _boardPosts[idx].acks.push(currentUser);
+    showToast(lang==='ja' ? `👍 ${currentUser} が了解しました` : `👍 ${currentUser} acknowledged`);
+  }
+  await saveBoard(_boardPosts);
+  renderBoardPosts();
+  renderBoardPagePosts();
 }
 
 function escHtml(s) {
@@ -1824,6 +2155,98 @@ async function postBoard() {
 async function deletePost(idx) {
   _boardPosts.splice(idx, 1);
   await saveBoard(_boardPosts);
+  renderBoardPosts();
+}
+
+async function openBoardPage() {
+  closeModal('boardOv');
+  document.getElementById('boardPage').classList.add('open');
+  _boardPosts = await loadBoard();
+  renderBoardPagePosts();
+  updateBoardPageAuthor();
+  buildBoardPageAcct();
+}
+
+function closeBoardPage() {
+  document.getElementById('boardPage').classList.remove('open');
+}
+
+function updateBoardPageAuthor() {
+  const nameEl = document.getElementById('boardPageAuthorName');
+  const lineEl = document.getElementById('boardPageAuthorLine');
+  const btnName = document.getElementById('boardPageAcctName');
+  if (nameEl) { nameEl.textContent = currentUser || (lang==='ja'?'ゲスト':'Guest'); nameEl.style.color = currentUser ? (FRONT_OFFICE.includes(currentUser)?'#82b1ff':'var(--gold)') : 'var(--sub)'; }
+  if (lineEl) lineEl.childNodes[0].textContent = (lang==='ja'?'投稿者':'Posting as') + ': ';
+  if (btnName) { btnName.textContent = currentUser || (lang==='ja'?'ゲスト':'Guest'); btnName.style.color = currentUser ? 'var(--gold)' : 'var(--sub)'; }
+  const btn = document.getElementById('boardPageAcctBtn');
+  if (btn) btn.classList.toggle('logged-in', !!currentUser);
+}
+
+function buildBoardPageAcct() {
+  const dd = document.getElementById('boardPageAcctDd');
+  if (!dd) return;
+  dd.innerHTML = '';
+  const guest = document.createElement('div'); guest.className = 'acct-option guest' + (!currentUser?' selected':'');
+  guest.textContent = lang==='ja'?'👤 ゲスト':'👤 Guest';
+  guest.onclick = () => { setAccount(''); updateBoardPageAuthor(); dd.classList.remove('open'); };
+  dd.appendChild(guest);
+  const lblP = document.createElement('div'); lblP.className = 'acct-group-label'; lblP.textContent = lang==='ja'?'選手':'Players'; dd.appendChild(lblP);
+  PLAYERS.forEach(name => {
+    const item = document.createElement('div'); item.className = 'acct-option'+(currentUser===name?' selected':''); item.textContent = name;
+    item.onclick = () => { setAccount(name); updateBoardPageAuthor(); buildBoardPageAcct(); dd.classList.remove('open'); document.getElementById('boardPageAcctBtn').classList.remove('open'); };
+    dd.appendChild(item);
+  });
+  const div = document.createElement('div'); div.className = 'acct-divider'; dd.appendChild(div);
+  const lblF = document.createElement('div'); lblF.className = 'acct-group-label'; lblF.textContent = lang==='ja'?'フロントオフィス':'Front Office'; dd.appendChild(lblF);
+  FRONT_OFFICE.forEach(name => {
+    const item = document.createElement('div'); item.className = 'acct-option'+(currentUser===name?' selected':''); item.textContent = name;
+    item.onclick = () => { setAccount(name); updateBoardPageAuthor(); buildBoardPageAcct(); dd.classList.remove('open'); document.getElementById('boardPageAcctBtn').classList.remove('open'); };
+    dd.appendChild(item);
+  });
+}
+
+function toggleBoardPageAcct() {
+  const btn = document.getElementById('boardPageAcctBtn');
+  const dd  = document.getElementById('boardPageAcctDd');
+  if (!btn||!dd) return;
+  const isOpen = dd.classList.contains('open');
+  dd.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+function renderBoardPagePosts() {
+  const el = document.getElementById('boardPagePosts');
+  if (!el) return;
+  if (!_boardPosts.length) {
+    el.innerHTML = `<div class="board-empty" style="padding:40px 20px">${lang==='ja'?'まだ投稿がありません':'No posts yet'}</div>`;
+    return;
+  }
+  el.innerHTML = _boardPosts.map((p, idx) => renderBoardPostHtml(p, idx, true)).join('');
+}
+
+function updateBoardPageCount() {
+  const ta = document.getElementById('boardPageTextarea');
+  const ct = document.getElementById('boardPageCharCount');
+  if (ta&&ct) ct.textContent = `${ta.value.length} / 500`;
+}
+
+async function postBoardPage() {
+  const ta = document.getElementById('boardPageTextarea');
+  const body = ta.value.trim();
+  if (!body) return;
+  const post = { author: currentUser||(lang==='ja'?'ゲスト':'Guest'), body, ts: Date.now() };
+  _boardPosts.unshift(post);
+  await saveBoard(_boardPosts);
+  ta.value = ''; updateBoardPageCount();
+  renderBoardPagePosts();
+  renderBoardPosts(); // モーダル側も更新
+  showToast(lang==='ja'?'📣 投稿しました':'📣 Posted');
+}
+
+async function deleteBoardPagePost(idx) {
+  _boardPosts.splice(idx, 1);
+  await saveBoard(_boardPosts);
+  renderBoardPagePosts();
   renderBoardPosts();
 }
 
@@ -1922,7 +2345,7 @@ function renderAnalytics() {
     rows.forEach(r => {
       const barCls = r.practicePct >= 70 ? '' : r.practicePct >= 40 ? 'mid' : 'low';
       html += `<tr>
-        <td><span class="am-tag ${tagCls}">${r.name}</span></td>
+        <td><span class="am-tag ${tagCls}">${dispName(r.name)}</span></td>
         <td style="font-family:'DM Mono',monospace">${r.practice} / ${totalPractice}</td>
         <td><div style="display:flex;align-items:center;gap:6px">
           <div class="am-bar-wrap"><div class="am-bar ${barCls}" style="width:${r.practicePct}%"></div></div>
@@ -1933,6 +2356,54 @@ function renderAnalytics() {
       </tr>`;
     });
     html += '</tbody></table>';
+    el.innerHTML = html;
+
+  } else if (_amTab === 'absences') {
+    const DOW_JP_A = ['日','月','火','水','木','金','土'];
+    const absRows = [];
+    Object.keys(res).sort().forEach(ds => {
+      const dayAbs = (data.absence||{})[ds]||{};
+      Object.keys(dayAbs).forEach(sid => {
+        (dayAbs[sid]||[]).forEach(entry => {
+          const name = absentName(entry);
+          const reason = absentReason(entry);
+          const d = new Date(ds+'T00:00:00');
+          const slotLabel = s.slotLabels[sid]||sid;
+          const fi = Object.keys(res[ds]||{}).includes(sid)
+            ? (res[ds][sid]?.[0]?.facId ? FAC_BASE.findIndex(x=>x.id===res[ds][sid][0].facId) : -1) : -1;
+          const fname = fi>=0 ? s.facilities[fi] : '';
+          absRows.push({ ds, d, sid, slotLabel, name, reason, fname });
+        });
+      });
+    });
+
+    const totalAbs = absRows.length;
+    let html = `<div class="am-summary-grid">
+      <div class="am-stat-card"><div class="sc-val">${totalAbs}</div><div class="sc-lbl">欠席総数</div></div>
+      <div class="am-stat-card"><div class="sc-val">${absRows.filter(r=>r.reason).length}</div><div class="sc-lbl">理由あり</div></div>
+      <div class="am-stat-card"><div class="sc-val">${new Set(absRows.map(r=>r.name)).size}</div><div class="sc-lbl">欠席選手数</div></div>
+    </div>`;
+
+    if (!absRows.length) {
+      html += `<div style="text-align:center;color:var(--muted);padding:30px;font-size:12px">欠席記録なし</div>`;
+    } else {
+      html += `<table class="am-table">
+        <thead><tr><th>日付</th><th>時間帯</th><th>施設</th><th>名前</th><th>理由</th></tr></thead><tbody>`;
+      absRows.forEach(r => {
+        const dow = r.d.getDay();
+        const dateStr = `${r.d.getMonth()+1}/${r.d.getDate()}(${DOW_JP_A[dow]})`;
+        const isFO = FRONT_OFFICE.includes(r.name);
+        const tagCls = isFO ? 'fo' : 'player';
+        html += `<tr>
+          <td style="font-family:'DM Mono',monospace;white-space:nowrap">${dateStr}</td>
+          <td>${r.slotLabel}</td>
+          <td style="font-size:11px">${r.fname}</td>
+          <td><span class="am-tag ${tagCls}">${dispName(r.name)}</span></td>
+          <td style="color:var(--sub);font-size:11px">${r.reason || '<span style="color:var(--muted)">—</span>'}</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+    }
     el.innerHTML = html;
 
   } else if (_amTab === 'sessions') {
@@ -1964,7 +2435,7 @@ function renderAnalytics() {
       const dateStr = `${r.d.getMonth()+1}/${r.d.getDate()} (${DOW_JP_S2[dow]})`;
       const nameTags = r.names.map(n => {
         const cls = FRONT_OFFICE.includes(n) ? 'fo' : 'player';
-        return `<span class="am-tag ${cls}">${n}</span>`;
+        return `<span class="am-tag ${cls}">${dispName(n)}</span>`;
       }).join(' ');
       html += `<tr>
         <td style="font-family:'DM Mono',monospace;white-space:nowrap">${dateStr}</td>
@@ -2081,8 +2552,8 @@ function openDetail(ds, sid, idx) {
     bodyHtml += `<span class="dm-empty-att">${lang==='ja'?'まだ参加表明なし':'No attendees yet'}</span>`;
   } else {
     bodyHtml += `<div class="dm-att-list">`;
-    players.forEach(n => { bodyHtml += `<span class="dm-att-player">✓ ${n}</span>`; });
-    fo.forEach(n => { bodyHtml += `<span class="dm-att-fo">✓ ${n}</span>`; });
+    players.forEach(n => { bodyHtml += `<span class="dm-att-player">✓ ${dispName(n)}</span>`; });
+    fo.forEach(n => { bodyHtml += `<span class="dm-att-fo">✓ ${dispName(n)}</span>`; });
     bodyHtml += `</div>`;
     const pCount = players.length, fCount = fo.length;
     const parts = [];
@@ -2202,30 +2673,7 @@ async function startApp() {
     document.getElementById('btnMonth').classList.remove('active');
     document.getElementById('btnWeek').classList.add('active');
   }
-  // データバージョン管理: バージョンが変わったら予約・試合データを自動更新（参加表明は保持）
-  const DATA_VERSION = 'v4';
-  const INITIAL_DATA = {"reservations":{"2026-04-01":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-02":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-04":{"eve":[{"facId":"d","purpose":"チーム練習","memo":"男女合同練習"}]},"2026-04-08":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-04-09":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-14":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-15":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-04-16":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-19":{"am":[{"facId":"f","purpose":"チーム練習","memo":"秋山中学校体育館9:00～12:00"}],"pm":[{"facId":"f","purpose":"チーム練習","memo":"秋山中学校体育館13:00～17:00"}],"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-04-20":{"am":[{"facId":"a","purpose":"チーム練習","memo":"9:00～12:00 上野原合宿"}],"pm":[{"facId":"d","purpose":"チーム練習","memo":"13:00～17:00 上野原合宿"}]},"2026-04-21":{"am":[{"facId":"a","purpose":"チーム練習","memo":"9:00～12:00  上野原合宿"}],"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-04-22":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-04-23":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-05":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-06":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-07":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-12":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-13":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-05-14":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-19":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-20":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-21":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-26":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-05-27":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-05-28":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-06-02":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-06-03":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-06-04":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-06-09":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-06-10":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-06-11":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-06-16":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-06-17":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-06-18":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-06-23":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-06-24":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-06-25":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-07-01":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-07-02":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-07-04":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND4 · 熊本城（熊本）"}]},"2026-07-07":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-07-08":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-07-09":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-07-14":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-07-15":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-07-16":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-07-21":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}]},"2026-07-22":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-07-23":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}]},"2026-07-28":{"eve":[{"facId":"a","purpose":"チーム練習","memo":""}]},"2026-07-29":{"eve":[{"facId":"d","purpose":"チーム練習","memo":""}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND5 FINAL · 博多駅前（福岡）"}]},"2026-07-30":{"eve":[{"facId":"c","purpose":"チーム練習","memo":""}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND5 FINAL · 博多駅前（福岡）"}]},"2026-05-16":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND1 · ワテラス（東京/千代田）"}]},"2026-05-30":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND2 · キャンパスクエア（ユニバードーム）（兵庫/姫路）"}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND1 · 歌舞伎町（東京）"}]},"2026-06-13":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND3 · 恩田スポーツパーク（山口/宇部）"}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND2 · 名古屋城（愛知）"}]},"2026-06-14":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND3 · 恩田スポーツパーク（山口/宇部）"}],"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND2 · 名古屋城（愛知）"}]},"2026-06-20":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND4 · オアシス21 銀河の広場（愛知/名古屋）"}]},"2026-07-18":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND5 · FLATHACHINAH E（青森/八戸）"}]},"2026-07-25":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND6 · FLATHACHINAH E（青森/八戸）"}]},"2026-07-26":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND6 · FLATHACHINAH E（青森/八戸）"}]},"2026-08-16":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND7 · 松下公園総合体育館（千葉/印西）"}]},"2026-09-05":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE ROUND8 · ひろしまゲートパーク（広島/広島）"}]},"2026-10-03":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE PLAYOFF/ROUND9 · グラングリーン大阪 ロートハートスクエアうめきた（大阪/大阪）"}]},"2026-10-04":{"exe":[{"facId":"j","purpose":"試合","memo":"EXE PLAYOFF/ROUND9 · グラングリーン大阪 ロートハートスクエアうめきた（大阪/大阪）"}]},"2026-05-31":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND1 · 歌舞伎町（東京）"}]},"2026-06-27":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND3 · 岡崎公園or三条（京都）"}]},"2026-06-28":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND3 · 岡崎公園or三条（京都）"}]},"2026-07-05":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL ROUND4 · 熊本城（熊本）"}]},"2026-08-08":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL チャレンジャー · 上野原市役所（山梨/上野原）"}]},"2026-08-09":{"rbl":[{"facId":"j","purpose":"試合","memo":"RBL チャレンジャー · 上野原市役所（山梨/上野原）"}]}},"notes":{},"attendance":{}};
-  const savedVersion = localStorage.getItem('sunrise_cal_version');
-  if (savedVersion !== DATA_VERSION) {
-    // バージョンが古い or 初回: 予約・試合データを上書き、参加表明は保持
-    const oldRaw = localStorage.getItem('sunrise_cal');
-    let savedAttendance = {};
-    let savedNotes = {};
-    if (oldRaw) {
-      try {
-        const oldData = JSON.parse(oldRaw);
-        savedAttendance = oldData.attendance || {};
-        savedNotes = oldData.notes || {};
-      } catch(e) {}
-    }
-    const merged = {
-      reservations: INITIAL_DATA.reservations,
-      notes: Object.assign({}, INITIAL_DATA.notes, savedNotes),
-      attendance: savedAttendance
-    };
-    localStorage.setItem('sunrise_cal', JSON.stringify(merged));
-    localStorage.setItem('sunrise_cal_version', DATA_VERSION);
-  }
+  // データはすべてFirebaseから読み込む（DATA_VERSION管理不要）
   await loadData();
   applyStrings();
   render();
