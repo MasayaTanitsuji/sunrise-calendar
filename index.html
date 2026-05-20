@@ -69,6 +69,28 @@ header {
 .sync-dot.err  { background:#ff6b6b; }
 .sync-label { font-size:10px; color:var(--sub); }
 .week-label { font-size:13px; font-weight:700; font-family:'DM Mono',monospace; color:var(--gold); min-width:120px; text-align:center; }
+/* View toggle */
+.view-toggle { display:flex; background:var(--surf3); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; }
+.view-toggle button { background:none; border:none; color:var(--sub); padding:4px 10px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .12s; }
+.view-toggle button.active { background:var(--surf2); color:var(--text); }
+/* Month view */
+.month-grid { display:grid; grid-template-columns:repeat(7,1fr); flex:1; overflow-y:auto; }
+.month-dow-hdr { display:grid; grid-template-columns:repeat(7,1fr); flex-shrink:0; border-bottom:2px solid var(--border); background:var(--surf); }
+.month-dow-cell { padding:7px 0; text-align:center; font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em; }
+.month-dow-cell.sun { color:#ff8787; }
+.month-dow-cell.sat { color:#74c0fc; }
+.month-day { min-height:100px; border-right:1px solid var(--border2); border-bottom:1px solid var(--border2); padding:4px; position:relative; overflow:hidden; }
+.month-day:nth-child(7n) { border-right:none; }
+.month-day.other-month { opacity:.35; }
+.month-day.is-today { background:rgba(240,192,64,.04); }
+.month-day .md-num { font-size:12px; font-weight:700; font-family:'DM Mono',monospace; margin-bottom:3px; display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; }
+.month-day.is-today .md-num { background:var(--gold); color:#0b0f18; }
+.month-day.sun .md-num { color:#ff8787; }
+.month-day.sat .md-num { color:#74c0fc; }
+.month-ev { font-size:9px; font-weight:600; padding:1px 5px; border-radius:3px; margin-bottom:2px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-left:2px solid transparent; }
+.month-ev:hover { filter:brightness(1.2); }
+.month-more { font-size:9px; color:var(--muted); padding:1px 4px; cursor:pointer; }
+.month-more:hover { color:var(--sub); }
 
 /* Account selector */
 .acct-btn { display:flex; align-items:center; gap:6px; background:var(--surf3); border:2px solid var(--border); border-radius:20px; padding:4px 12px 4px 10px; cursor:pointer; transition:all .15s; position:relative; user-select:none; }
@@ -424,6 +446,7 @@ header {
   header { flex-wrap:wrap; height:auto; padding:8px 10px; gap:6px; }
   .nav-row { gap:5px; }
   .week-label { min-width:90px; font-size:11px; }
+  .view-toggle button { padding:4px 7px; font-size:10px; }
 }
 </style>
 </head>
@@ -456,9 +479,14 @@ header {
       <div class="sync-dot" id="syncDot"></div>
       <span class="sync-label" id="syncLbl">Ready</span>
     </div>
-    <button class="btn-s" onclick="navWeek(-1)">←</button>
+    <div class="view-toggle">
+      <button id="btnMonth" onclick="setView('month')">月</button>
+      <button id="btnWeek"  onclick="setView('week')" class="active">週</button>
+      <button id="btnDay"   onclick="setView('day')">日</button>
+    </div>
+    <button class="btn-s" onclick="navPrev()">←</button>
     <div class="week-label" id="weekLabel">—</div>
-    <button class="btn-s" onclick="navWeek(1)">→</button>
+    <button class="btn-s" onclick="navNext()">→</button>
     <button class="btn-s" onclick="goToday()">今日</button>
     <div class="board-btn-wrap">
       <button class="btn-s" onclick="openBoard()">📣 掲示板</button>
@@ -477,16 +505,24 @@ header {
 <div class="main-area">
   <!-- CALENDAR -->
   <div id="calOuter" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
-    <!-- Day headers (sticky top) -->
-    <div class="cal-top" id="calTop">
-      <div class="cal-top-spacer"></div>
-      <div class="day-hdr-wrap" id="dayHdrWrap"></div>
+    <!-- Month view -->
+    <div id="monthView" style="display:none;flex:1;overflow:hidden;display:none;flex-direction:column">
+      <div class="month-dow-hdr" id="monthDowHdr"></div>
+      <div class="month-grid" id="monthGrid"></div>
     </div>
-    <!-- Scrollable grid -->
-    <div class="cal-scroll-wrap" id="calScrollWrap">
-      <div class="cal-grid" id="calGrid">
-        <div class="time-axis" id="timeAxis"></div>
-        <div class="day-cols" id="dayCols"></div>
+    <!-- Week/Day view -->
+    <div id="timelineView" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+      <!-- Day headers (sticky top) -->
+      <div class="cal-top" id="calTop">
+        <div class="cal-top-spacer"></div>
+        <div class="day-hdr-wrap" id="dayHdrWrap"></div>
+      </div>
+      <!-- Scrollable grid -->
+      <div class="cal-scroll-wrap" id="calScrollWrap">
+        <div class="cal-grid" id="calGrid">
+          <div class="time-axis" id="timeAxis"></div>
+          <div class="day-cols" id="dayCols"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -714,6 +750,9 @@ let lang    = 'ja';
 let isEdit  = false;
 let currentUser = localStorage.getItem('sunrise_user_v2') || '';
 let weekStart   = getWeekStart(new Date());
+let viewMode    = 'week'; // 'week' | 'month' | 'day'
+let currentDay  = new Date(); currentDay.setHours(0,0,0,0);
+let currentMonth = new Date(); currentMonth.setDate(1); currentMonth.setHours(0,0,0,0);
 let data = { events:{}, attendance:{}, absence:{} };
 let _pEvt    = null;  // pending event for modal
 let _pDetail = null;  // pending detail for att/absent
@@ -844,6 +883,13 @@ function getAllFutureEvents() {
 //  RENDER CALENDAR
 // ============================================================
 function render() {
+  if (viewMode==='month') {
+    renderMonthLabel();
+    renderMonthView();
+    renderSidePanel();
+    return;
+  }
+  // week or day
   renderWeekLabel();
   renderDayHeaders();
   renderTimeAxis();
@@ -852,7 +898,100 @@ function render() {
   renderNowLine();
 }
 
+function renderMonthLabel() {
+  const y=currentMonth.getFullYear(), m=currentMonth.getMonth();
+  const MONTHS_JA=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('weekLabel').textContent = lang==='ja'
+    ? `${y}年 ${MONTHS_JA[m]}`
+    : `${MONTHS_EN[m]} ${y}`;
+}
+
+function renderMonthView() {
+  const DOW_JA=['月','火','水','木','金','土','日'];
+  const DOW_EN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const DOW = lang==='ja' ? DOW_JA : DOW_EN;
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // DOW header
+  const dowHdr = document.getElementById('monthDowHdr');
+  dowHdr.innerHTML='';
+  DOW.forEach((d,i)=>{
+    const el=document.createElement('div');
+    el.className='month-dow-cell'+(i===5?' sat':i===6?' sun':'');
+    el.textContent=d; dowHdr.appendChild(el);
+  });
+
+  // Grid
+  const grid = document.getElementById('monthGrid');
+  grid.innerHTML='';
+  const y=currentMonth.getFullYear(), m=currentMonth.getMonth();
+  const firstDay = new Date(y,m,1);
+  const lastDay  = new Date(y,m+1,0);
+  const startDow = (firstDay.getDay()+6)%7; // Mon=0
+  const totalCells = Math.ceil((startDow + lastDay.getDate()) / 7) * 7;
+
+  for (let i=0; i<totalCells; i++) {
+    const dt = new Date(y,m,1-startDow+i);
+    const dow = (dt.getDay()+6)%7; // Mon=0
+    const isThisMonth = dt.getMonth()===m;
+    const isToday = dt.getTime()===today.getTime();
+    const ds = fmtDate(dt);
+
+    const cell = document.createElement('div');
+    cell.className = 'month-day'
+      +(isToday?' is-today':'')
+      +(!isThisMonth?' other-month':'')
+      +(dow===6?' sun':dow===5?' sat':'');
+
+    // Date number
+    const numEl = document.createElement('div');
+    numEl.className='md-num'; numEl.textContent=dt.getDate();
+    cell.appendChild(numEl);
+
+    // Events
+    const evs = getEventsForDay(ds);
+    const MAX_SHOW = 3;
+    evs.slice(0,MAX_SHOW).forEach(ev=>{
+      const fac=FAC_BASE.find(x=>x.id===ev.facId)||FAC_BASE[8];
+      const isMatch=ev.purpose==='試合';
+      const title=isMatch?`⚔ ${ev.memo||facName(ev.facId)}`:`${facName(ev.facId)}`;
+      const evEl=document.createElement('div');
+      evEl.className='month-ev';
+      evEl.style.cssText=`background:${fac.bg};color:${fac.fg};border-left-color:${fac.bd}`;
+      evEl.textContent=`${formatTimeStr(ev.start)} ${title}`;
+      evEl.onclick=()=>openDetail(ev,ds);
+      cell.appendChild(evEl);
+    });
+    if(evs.length>MAX_SHOW){
+      const more=document.createElement('div');
+      more.className='month-more';
+      more.textContent=`+${evs.length-MAX_SHOW}件`;
+      more.onclick=()=>{ currentDay=new Date(dt); setView('day'); };
+      cell.appendChild(more);
+    }
+
+    // Click empty area → add event (edit mode) or switch to day view
+    cell.addEventListener('click',(e)=>{
+      if(e.target===cell||e.target===numEl){
+        if(isEdit){ currentDay=new Date(dt); setView('day'); }
+        else { currentDay=new Date(dt); setView('day'); }
+      }
+    });
+    grid.appendChild(cell);
+  }
+}
+
 function renderWeekLabel() {
+  if (viewMode==='day') {
+    const DOW_JA=['日','月','火','水','木','金','土'];
+    const DOW_EN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const dow=lang==='ja'?DOW_JA[currentDay.getDay()]:DOW_EN[currentDay.getDay()];
+    document.getElementById('weekLabel').textContent = lang==='ja'
+      ? `${currentDay.getMonth()+1}月${currentDay.getDate()}日（${dow}）`
+      : `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][currentDay.getMonth()]} ${currentDay.getDate()} (${dow})`;
+    return;
+  }
   const we = new Date(weekStart); we.setDate(we.getDate()+6);
   const fmt=(d)=>`${d.getMonth()+1}/${d.getDate()}`;
   document.getElementById('weekLabel').textContent=`${fmt(weekStart)} – ${fmt(we)}`;
@@ -865,8 +1004,9 @@ function renderDayHeaders() {
   const DOW_JA = ['日','月','火','水','木','金','土'];
   const DOW_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-  for (let i=0;i<7;i++) {
-    const dt = new Date(weekStart); dt.setDate(dt.getDate()+i);
+  const dayCount = viewMode==='day' ? 1 : 7;
+  for (let i=0;i<dayCount;i++) {
+    const dt = viewMode==='day' ? new Date(currentDay) : new Date(weekStart); if(viewMode!=='day') dt.setDate(dt.getDate()+i);
     const dow = dt.getDay();
     const isToday = dt.getTime()===today.getTime();
     const sched = getDaySched(dow);
@@ -949,8 +1089,9 @@ function renderDayCols() {
   cols.innerHTML='';
   const today=new Date();today.setHours(0,0,0,0);
 
-  for(let i=0;i<7;i++){
-    const dt=new Date(weekStart);dt.setDate(dt.getDate()+i);
+  const dCount = viewMode==='day' ? 1 : 7;
+  for(let i=0;i<dCount;i++){
+    const dt = viewMode==='day' ? new Date(currentDay) : new Date(weekStart); if(viewMode!=='day') dt.setDate(dt.getDate()+i);
     const dow=dt.getDay();
     const isToday=dt.getTime()===today.getTime();
     const ds=fmtDate(dt);
@@ -1042,11 +1183,35 @@ function renderNowLine() {
 // ============================================================
 //  NAVIGATION
 // ============================================================
-function navWeek(d){
-  weekStart=new Date(weekStart);weekStart.setDate(weekStart.getDate()+d*7);render();
+function setView(v) {
+  viewMode = v;
+  document.getElementById('btnMonth').classList.toggle('active', v==='month');
+  document.getElementById('btnWeek').classList.toggle('active',  v==='week');
+  document.getElementById('btnDay').classList.toggle('active',   v==='day');
+  document.getElementById('monthView').style.display    = v==='month' ? 'flex' : 'none';
+  document.getElementById('timelineView').style.display = v!=='month' ? 'flex' : 'none';
+  if (v==='week') {
+    // 日ビューから週ビューに戻る際、currentDayを含む週に移動
+    weekStart = getWeekStart(currentDay);
+  }
+  render();
 }
+function navPrev() {
+  if (viewMode==='month') { currentMonth.setMonth(currentMonth.getMonth()-1); render(); }
+  else if (viewMode==='week') { weekStart=new Date(weekStart); weekStart.setDate(weekStart.getDate()-7); render(); }
+  else { currentDay=new Date(currentDay); currentDay.setDate(currentDay.getDate()-1); render(); }
+}
+function navNext() {
+  if (viewMode==='month') { currentMonth.setMonth(currentMonth.getMonth()+1); render(); }
+  else if (viewMode==='week') { weekStart=new Date(weekStart); weekStart.setDate(weekStart.getDate()+7); render(); }
+  else { currentDay=new Date(currentDay); currentDay.setDate(currentDay.getDate()+1); render(); }
+}
+function navWeek(d){ weekStart=new Date(weekStart);weekStart.setDate(weekStart.getDate()+d*7);render(); }
 function goToday(){
-  weekStart=getWeekStart(new Date());render();
+  weekStart=getWeekStart(new Date());
+  currentDay=new Date(); currentDay.setHours(0,0,0,0);
+  currentMonth=new Date(); currentMonth.setDate(1); currentMonth.setHours(0,0,0,0);
+  render();
   // Scroll to current time
   const y=nowY();
   if(y!==null){
@@ -1610,6 +1775,9 @@ document.addEventListener('click',e=>{
 async function startApp(){
   setSyncing('busy','読み込み中…');
   await loadData();
+  // Init views
+  document.getElementById('monthView').style.display='none';
+  document.getElementById('timelineView').style.display='flex';
   // Scroll to current time or 7:00
   const y=nowY();
   const wrap=document.getElementById('calScrollWrap');
