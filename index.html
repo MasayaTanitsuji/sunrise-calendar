@@ -299,6 +299,15 @@ header {
 .time-sel { flex:1; background:var(--surf3); border:1px solid var(--border); border-radius:var(--r); color:var(--text); padding:8px 10px; font-size:12px; outline:none; font-family:inherit; cursor:pointer; }
 .time-sel:focus { border-color:var(--gold2); }
 .time-sel option { background:var(--surf2); }
+/* Repeat settings */
+.repeat-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+.dow-btn { background:var(--surf3); border:1px solid var(--border); color:var(--sub); width:32px; height:32px; border-radius:50%; font-size:11px; font-weight:700; cursor:pointer; transition:all .12s; font-family:inherit; flex-shrink:0; }
+.dow-btn.sel { background:var(--gold); border-color:var(--gold); color:#0b0f18; }
+.repeat-until { width:100%; background:var(--surf3); border:1px solid var(--border); border-radius:var(--r); color:var(--text); padding:7px 10px; font-size:12px; outline:none; margin-top:8px; font-family:inherit; }
+.repeat-until:focus { border-color:var(--gold2); }
+.repeat-preview { font-size:10px; color:var(--sub); margin-top:6px; min-height:14px; }
+.copy-btn { background:var(--surf2); border:1px dashed var(--border); color:var(--sub); padding:5px 12px; border-radius:var(--r); font-size:11px; font-weight:700; cursor:pointer; transition:all .12s; font-family:inherit; }
+.copy-btn:hover { border-color:var(--gold2); color:var(--gold); background:var(--gold-dim); }
 .mfoot { display:flex; gap:8px; margin-top:18px; }
 .btn-cancel { flex:1; background:none; border:1px solid var(--border); color:var(--sub); padding:9px; border-radius:7px; font-size:12px; font-weight:700; }
 .btn-save   { flex:2; background:var(--gold); border:none; color:#0b0f18; padding:9px; border-radius:7px; font-size:12px; font-weight:700; }
@@ -331,6 +340,16 @@ header {
 /* Absent reason modal */
 .ab-reason { width:100%; background:var(--surf3); border:1px solid var(--border); border-radius:var(--r); color:var(--text); padding:8px 10px; font-size:12px; outline:none; resize:none; }
 .ab-reason:focus { border-color:var(--gold2); }
+/* Join modal */
+.fatigue-wrap { display:flex; align-items:center; gap:10px; }
+.fatigue-slider { flex:1; accent-color:var(--gold); cursor:pointer; }
+.fatigue-val { font-size:18px; font-weight:700; font-family:'DM Mono',monospace; color:var(--gold); min-width:28px; text-align:center; }
+.fatigue-labels { display:flex; justify-content:space-between; font-size:9px; color:var(--muted); margin-top:2px; }
+.injury-inp { width:100%; background:var(--surf3); border:1px solid var(--border); border-radius:var(--r); color:var(--text); padding:8px 10px; font-size:12px; outline:none; }
+.injury-inp:focus { border-color:var(--gold2); }
+.join-chip { display:inline-flex; align-items:center; gap:4px; font-size:10px; padding:2px 8px; border-radius:10px; }
+.join-chip.fatigue { background:rgba(240,192,64,.12); color:var(--gold); border:1px solid rgba(240,192,64,.25); }
+.join-chip.injury { background:rgba(255,107,107,.12); color:#ff8787; border:1px solid rgba(255,107,107,.25); }
 
 /* Toast */
 .toast { position:fixed; bottom:22px; right:22px; background:#1e7a33; color:#fff; padding:9px 15px; border-radius:8px; font-size:12px; z-index:400; opacity:0; transform:translateY(8px); transition:all .22s; pointer-events:none; }
@@ -590,9 +609,34 @@ header {
       <label style="display:flex;align-items:center;gap:6px">🔒 内部メモ <span style="font-size:9px;color:var(--muted);font-weight:400">（編集モードのみ表示）</span></label>
       <input type="text" id="evPrivate" placeholder="例：Shibataに確認済み、施設費用など">
     </div>
+    <!-- Repeat settings (add mode only) -->
+    <div class="fg" id="repeatFg">
+      <label id="t-repeat-lbl" style="display:flex;align-items:center;gap:8px">
+        🔁 繰り返し
+        <select id="repeatType" onchange="onRepeatChange()" style="background:var(--surf3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);padding:4px 8px;font-size:11px;outline:none;font-family:inherit">
+          <option value="none">なし</option>
+          <option value="weekly">毎週</option>
+          <option value="custom">曜日指定</option>
+        </select>
+      </label>
+      <div id="repeatDowRow" class="repeat-row" style="display:none">
+        <button class="dow-btn" data-dow="1" onclick="toggleDow(this)">月</button>
+        <button class="dow-btn" data-dow="2" onclick="toggleDow(this)">火</button>
+        <button class="dow-btn" data-dow="3" onclick="toggleDow(this)">水</button>
+        <button class="dow-btn" data-dow="4" onclick="toggleDow(this)">木</button>
+        <button class="dow-btn" data-dow="5" onclick="toggleDow(this)">金</button>
+        <button class="dow-btn" data-dow="6" onclick="toggleDow(this)">土</button>
+        <button class="dow-btn" data-dow="0" onclick="toggleDow(this)">日</button>
+      </div>
+      <div id="repeatUntilWrap" style="display:none">
+        <input type="date" class="repeat-until" id="repeatUntil">
+        <div class="repeat-preview" id="repeatPreview"></div>
+      </div>
+    </div>
     <div class="mfoot">
       <button class="btn-cancel" onclick="closeModal('evOv')" id="evCancelBtn">キャンセル</button>
       <button class="btn-del" id="evDelBtn" onclick="confirmDelEvent()" style="display:none">削除</button>
+      <button class="copy-btn" id="evCopyBtn" onclick="copyEvent()" style="display:none">📋 コピー</button>
       <button class="btn-save" onclick="saveEvent()">保存</button>
     </div>
   </div>
@@ -608,8 +652,42 @@ header {
     <div class="dm-body" id="dm-body"></div>
     <div class="dm-footer">
       <button class="dm-btn close" onclick="closeModal('detailOv')">閉じる</button>
+      <button class="dm-btn" id="dm-copy-btn" onclick="openCopyFromDetail()" style="background:var(--surf3);border:1px solid var(--border);color:var(--sub);display:none">📋 コピー</button>
       <button class="dm-btn absent" id="dm-absent-btn" onclick="openAbsentFromDetail()">✗ 不参加</button>
       <button class="dm-btn join"   id="dm-join-btn"   onclick="joinFromDetail()">✓ 参加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Join modal (fatigue + injury) -->
+<div class="overlay" id="joinOv" onclick="ovClose(event,'joinOv')">
+  <div class="modal">
+    <h3 id="joinOvTitle">✓ 参加を記録</h3>
+    <div class="fg">
+      <label id="t-join-name-lbl">名前</label>
+      <select id="joinNameSel" style="width:100%;background:var(--surf3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);padding:8px 10px;font-size:12px;outline:none;font-family:inherit"></select>
+    </div>
+    <div class="fg">
+      <label style="display:flex;align-items:center;gap:6px">
+        💪 先週の疲労度
+        <span style="font-size:9px;color:var(--muted);font-weight:400">（1=元気 / 10=かなり疲れ）</span>
+      </label>
+      <div class="fatigue-wrap">
+        <input type="range" class="fatigue-slider" id="fatigueSlider" min="1" max="10" value="5" oninput="document.getElementById('fatigueVal').textContent=this.value">
+        <div class="fatigue-val" id="fatigueVal">5</div>
+      </div>
+      <div class="fatigue-labels"><span>1 元気</span><span>10 疲れ</span></div>
+    </div>
+    <div class="fg">
+      <label style="display:flex;align-items:center;gap:6px">
+        🩹 怪我・痛みの箇所
+        <span style="font-size:9px;color:var(--muted);font-weight:400">（任意）</span>
+      </label>
+      <input type="text" class="injury-inp" id="injuryInp" placeholder="例：右膝、腰など。なければ空欄">
+    </div>
+    <div class="mfoot">
+      <button class="btn-cancel" onclick="closeModal('joinOv')">キャンセル</button>
+      <button class="btn-join" onclick="saveJoin()">✓ 参加を記録</button>
     </div>
   </div>
 </div>
@@ -619,12 +697,12 @@ header {
   <div class="modal">
     <h3 id="absentTitle">✗ 不参加を記録</h3>
     <div class="fg">
-      <label>名前</label>
+      <label id="t-absent-name-lbl">名前</label>
       <select id="absentNameSel"></select>
     </div>
     <div class="fg">
-      <label>理由（任意）</label>
-      <textarea class="ab-reason" id="absentReason" rows="3" placeholder="例：仕事、体調不良、遠征など"></textarea>
+      <label id="t-absent-reason-lbl">理由 <span style="color:#ff6b6b;font-size:10px">（必須）</span></label>
+      <textarea class="ab-reason" id="absentReason" rows="3" id="t-absent-reason-ph" placeholder="例：仕事、体調不良、遠征など（必須）"></textarea>
     </div>
     <div class="mfoot">
       <button class="btn-cancel" onclick="closeModal('absentOv')">キャンセル</button>
@@ -823,6 +901,9 @@ function getDaySched(dow) {
 }
 function absentName(e) { return typeof e==='string'?e:e.name; }
 function absentReason(e) { return typeof e==='string'?'':e.reason||''; }
+function attName(e) { return typeof e==='string'?e:e.name; }
+function attFatigue(e) { return typeof e==='object'&&e.fatigue?e.fatigue:null; }
+function attInjury(e) { return typeof e==='object'&&e.injury?e.injury:''; }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function showToast(msg) {
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
@@ -1049,7 +1130,7 @@ function renderDayHeaders() {
     const dayAtt=(data.attendance||{})[ds]||{};
     const dayAbs=(data.absence||{})[ds]||{};
     const uP=new Set(),uF=new Set(),uAP=new Set(),uAF=new Set();
-    Object.values(dayAtt).forEach(names=>(names||[]).forEach(n=>{if(FRONT_OFFICE.includes(n))uF.add(n);else uP.add(n);}));
+    Object.values(dayAtt).forEach(names=>(names||[]).forEach(e=>{const n=attName(e);if(FRONT_OFFICE.includes(n))uF.add(n);else uP.add(n);}));
     Object.values(dayAbs).forEach(entries=>(entries||[]).forEach(e=>{const n=absentName(e);if(FRONT_OFFICE.includes(n))uAF.add(n);else uAP.add(n);}));
     if(uP.size||uF.size){
       const ac=document.createElement('span');ac.className='dh-att';
@@ -1159,7 +1240,8 @@ function renderEventBlock(col, ev, ds) {
     : `${facName(ev.facId)}${ev.purpose&&ev.purpose!=='チーム練習'&&ev.purpose!=='Team Practice'?` · ${ev.purpose}`:''}`;
 
   // Attendance count
-  const atts=((data.attendance||{})[ds]||{})[ev.id]||[];
+  const attsRaw=((data.attendance||{})[ds]||{})[ev.id]||[];
+  const atts=attsRaw;
   const absents=((data.absence||{})[ds]||{})[ev.id]||[];
 
   block.innerHTML=`
@@ -1259,11 +1341,20 @@ function openAddEvent(ds, slot){
   const startTime=slotToTime(slot);
   const endSlot=Math.min(slot+2, SLOTS-1);
   const endTime=slotToTime(endSlot);
-  document.getElementById('evStart').value=startTime;
-  document.getElementById('evEnd').value=endTime;
   document.getElementById('evMemo').value='';
-  // Build fac select
+  document.getElementById('evPrivate').value='';
   buildFacSelect();
+  buildTimeSelects(startTime, endTime);
+  // 繰り返しUI
+  document.getElementById('repeatFg').style.display = '';
+  document.getElementById('repeatType').value = 'none';
+  document.getElementById('repeatDowRow').style.display = 'none';
+  document.getElementById('repeatUntilWrap').style.display = 'none';
+  document.getElementById('repeatPreview').textContent = '';
+  document.getElementById('evCopyBtn').style.display = 'none';
+  // デフォルト終了日を2ヶ月後に設定
+  const defUntil = new Date(ds+'T00:00:00'); defUntil.setMonth(defUntil.getMonth()+2);
+  document.getElementById('repeatUntil').value = fmtDate(defUntil);
   document.getElementById('evOv').classList.add('open');
 }
 
@@ -1278,7 +1369,92 @@ function openEditEvent(ev, ds){
   document.getElementById('evPurpose').value=ev.purpose;
   document.getElementById('evMemo').value=ev.memo||'';
   document.getElementById('evPrivate').value=ev.privateNote||'';
+  // 編集時は繰り返し非表示、コピーボタン表示
+  document.getElementById('repeatFg').style.display = 'none';
+  document.getElementById('evCopyBtn').style.display = '';
   document.getElementById('evOv').classList.add('open');
+}
+
+// ============================================================
+//  REPEAT & COPY HELPERS
+// ============================================================
+function onRepeatChange() {
+  const type = document.getElementById('repeatType').value;
+  const dowRow  = document.getElementById('repeatDowRow');
+  const untilWrap = document.getElementById('repeatUntilWrap');
+  dowRow.style.display   = type==='custom' ? 'flex' : 'none';
+  untilWrap.style.display = type!=='none'  ? 'block' : 'none';
+  updateRepeatPreview();
+}
+
+function toggleDow(btn) {
+  btn.classList.toggle('sel');
+  updateRepeatPreview();
+}
+
+function getSelectedDows() {
+  return [...document.querySelectorAll('.dow-btn.sel')].map(b=>parseInt(b.dataset.dow));
+}
+
+function updateRepeatPreview() {
+  const type  = document.getElementById('repeatType').value;
+  const until = document.getElementById('repeatUntil').value;
+  const prev  = document.getElementById('repeatPreview');
+  if (type==='none' || !until) { if(prev) prev.textContent=''; return; }
+  const dates = calcRepeatDates(_pEvt?.ds, type, until, getSelectedDows());
+  if (prev) prev.textContent = dates.length > 0
+    ? (lang==='ja' ? `${dates.length}件作成予定: ${dates.slice(0,3).join(', ')}${dates.length>3?'…':''}` : `${dates.length} events: ${dates.slice(0,3).join(', ')}${dates.length>3?'…':''}`)
+    : (lang==='ja' ? '該当する日付がありません' : 'No matching dates');
+}
+
+function calcRepeatDates(startDs, type, untilDs, dows) {
+  if (!startDs || !untilDs) return [];
+  const start = new Date(startDs+'T00:00:00');
+  const until = new Date(untilDs+'T00:00:00');
+  const dates = [];
+  const cur = new Date(start); cur.setDate(cur.getDate()+1); // 翌日から
+  while (cur <= until) {
+    const dow = cur.getDay();
+    if (type==='weekly' && dow===start.getDay()) dates.push(fmtDate(new Date(cur)));
+    else if (type==='custom' && dows.includes(dow)) dates.push(fmtDate(new Date(cur)));
+    cur.setDate(cur.getDate()+1);
+    if (dates.length > 52) break; // 上限52件
+  }
+  return dates;
+}
+
+function copyEvent() {
+  if (!_pEvt?.id) return;
+  const src = data.events[_pEvt.id];
+  if (!src) return;
+  // コピー元をプリセットしてコピーモードで開く
+  closeModal('evOv');
+  _pEvt = { ds: src.date, id: null, _copyFrom: _pEvt.id };
+  document.getElementById('evOvTitle').textContent = '📋 予約をコピー';
+  document.getElementById('evDelBtn').style.display = 'none';
+  document.getElementById('evCopyBtn').style.display = 'none';
+  document.getElementById('repeatFg').style.display = '';
+  buildFacSelect();
+  buildTimeSelects(src.start.slice(0,5), src.end.slice(0,5));
+  document.getElementById('evFac').value     = src.facId;
+  document.getElementById('evPurpose').value = src.purpose;
+  document.getElementById('evMemo').value    = src.memo||'';
+  document.getElementById('evPrivate').value = src.privateNote||'';
+  document.getElementById('repeatType').value = 'none';
+  onRepeatChange();
+  // デフォルトの日付を翌日に
+  const nextDay = new Date(src.date+'T00:00:00');
+  nextDay.setDate(nextDay.getDate()+1);
+  _pEvt.ds = fmtDate(nextDay);
+  document.getElementById('evOv').classList.add('open');
+}
+
+function openCopyFromDetail() {
+  if (!_pDetail) return;
+  const {ev, ds} = _pDetail;
+  closeModal('detailOv');
+  _pEvt = { ds, id: ev.id };
+  copyEvent();
 }
 
 function buildFacSelect(){
@@ -1324,7 +1500,22 @@ function saveEvent(){
   if(!data.events) data.events={};
   const id=_pEvt.id||genId();
   data.events[id]={date:ds,facId,purpose,start,end,memo,privateNote};
-  closeModal('evOv');saveData();render();showToast('保存しました');
+
+  // 繰り返し処理
+  const repeatType=document.getElementById('repeatType')?.value||'none';
+  const repeatUntil=document.getElementById('repeatUntil')?.value||'';
+  if(repeatType!=='none' && repeatUntil){
+    const dows=getSelectedDows();
+    const dates=calcRepeatDates(ds, repeatType, repeatUntil, dows);
+    dates.forEach(d=>{
+      const rid=genId();
+      data.events[rid]={date:d,facId,purpose,start,end,memo,privateNote};
+    });
+    closeModal('evOv');saveData();render();
+    showToast(lang==='ja'?`✅ ${dates.length+1}件保存しました`:`✅ Saved ${dates.length+1} events`);
+    return;
+  }
+  closeModal('evOv');saveData();render();showToast(lang==='ja'?'保存しました':'Saved');
 }
 
 function confirmDelEvent(){
@@ -1367,10 +1558,12 @@ function openDetail(ev, ds){
   document.getElementById('dm-meta').textContent=`${dateStr}　${formatTimeStr(ev.start)} – ${formatTimeStr(ev.end)}`;
 
   // Body
-  const atts=((data.attendance||{})[ds]||{})[ev.id]||[];
+  const attsRaw=((data.attendance||{})[ds]||{})[ev.id]||[];
+  const atts=attsRaw;
   const absents=((data.absence||{})[ds]||{})[ev.id]||[];
-  const players=atts.filter(n=>PLAYERS.includes(n));
-  const fo=atts.filter(n=>FRONT_OFFICE.includes(n));
+  const attNames=atts.map(e=>attName(e));
+  const players=attNames.filter(n=>PLAYERS.includes(n));
+  const fo=attNames.filter(n=>FRONT_OFFICE.includes(n));
   const abP=absents.filter(e=>PLAYERS.includes(absentName(e)));
   const abF=absents.filter(e=>FRONT_OFFICE.includes(absentName(e)));
 
@@ -1381,8 +1574,14 @@ function openDetail(ev, ds){
   // Attendance
   html+=`<div class="dm-row"><div class="dm-lbl">${lang==='ja'?'参加':'Join'}</div><div class="dm-val"><div class="att-list">`;
   if(!atts.length) html+=`<span style="color:var(--muted);font-size:11px;font-style:italic">${lang==='ja'?'まだなし':'None yet'}</span>`;
-  players.forEach(n=>html+=`<span class="att-chip p">✓ ${dn(n)}</span>`);
-  fo.forEach(n=>html+=`<span class="att-chip fo">✓ ${dn(n)}</span>`);
+  atts.filter(e=>PLAYERS.includes(attName(e))).forEach(e=>{
+    const f=attFatigue(e); const inj=attInjury(e);
+    const extra=(f?`💪${f}`:'')+(inj?` 🩹${inj}`:'');
+    html+=`<span class="att-chip p" title="${extra}">✓ ${dn(attName(e))}${extra?` <span style="opacity:.7;font-size:9px">${extra}</span>`:''}</span>`;
+  });
+  atts.filter(e=>FRONT_OFFICE.includes(attName(e))).forEach(e=>{
+    html+=`<span class="att-chip fo">✓ ${dn(attName(e))}</span>`;
+  });
   html+=`</div></div></div>`;
 
   // Absences
@@ -1395,8 +1594,11 @@ function openDetail(ev, ds){
   document.getElementById('dm-body').innerHTML=html;
 
   // Button states
-  const iJoined=currentUser&&atts.includes(currentUser);
+  const iJoined=currentUser&&atts.some(e=>attName(e)===currentUser);
   const iAbsent=currentUser&&absents.some(e=>absentName(e)===currentUser);
+  // コピーボタン（編集モード時のみ）
+  const copyBtn=document.getElementById('dm-copy-btn');
+  if(copyBtn) copyBtn.style.display=isEdit?'':'none';
   const jBtn=document.getElementById('dm-join-btn');
   const aBtn=document.getElementById('dm-absent-btn');
   jBtn.textContent=iJoined?(lang==='ja'?'✓ 参加済（取消）':'✓ Joined (cancel)'):(lang==='ja'?'✓ 参加':'✓ Join');
@@ -1409,25 +1611,65 @@ function openDetail(ev, ds){
 function joinFromDetail(){
   if(!_pDetail) return;
   const {ev,ds}=_pDetail;
-  if(!currentUser){ showToast(lang==='ja'?'名前を選択してください':'Please select your name'); return; }
+  // すでに参加済みの場合は取り消し（モーダルなし）
+  const arr=((data.attendance||{})[ds]||{})[ev.id]||[];
+  if(arr.includes(currentUser)){
+    if(!data.attendance)data.attendance={};
+    if(!data.attendance[ds])data.attendance[ds]={};
+    data.attendance[ds][ev.id]=arr.filter(n=>n!==currentUser);
+    saveData(); closeModal('detailOv'); render();
+    showToast(lang==='ja'?`${dn(currentUser)} の参加を取り消しました`:`Cancelled attendance for ${currentUser}`);
+    return;
+  }
+  // 新規参加 → モーダルを開く
+  closeModal('detailOv');
+  openJoinModal(_pDetail.ev, _pDetail.ds);
+}
+
+function openJoinModal(ev, ds){
+  _pDetail = {ev, ds};
+  // Name select
+  const sel=document.getElementById('joinNameSel');
+  sel.innerHTML=`<option value="">-- ${lang==='ja'?'選択':'Select'} --</option>`;
+  const gP=document.createElement('optgroup'); gP.label=lang==='ja'?'選手':'Players';
+  PLAYERS.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=dn(n);gP.appendChild(o);});
+  sel.appendChild(gP);
+  const gF=document.createElement('optgroup'); gF.label=lang==='ja'?'フロントオフィス':'Front Office';
+  FRONT_OFFICE.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=dn(n);gF.appendChild(o);});
+  sel.appendChild(gF);
+  if(currentUser) sel.value=currentUser;
+  // Reset fields
+  document.getElementById('fatigueSlider').value=5;
+  document.getElementById('fatigueVal').textContent='5';
+  document.getElementById('injuryInp').value='';
+  // i18n
+  const jnlbl=document.getElementById('t-join-name-lbl');
+  if(jnlbl) jnlbl.textContent=lang==='ja'?'名前':'Name';
+  document.getElementById('joinOv').classList.add('open');
+  setTimeout(()=>{ if(!currentUser) sel.focus(); else document.getElementById('fatigueSlider').focus(); },50);
+}
+
+function saveJoin(){
+  if(!_pDetail) return;
+  const {ev,ds}=_pDetail;
+  const name=document.getElementById('joinNameSel').value;
+  if(!name){ document.getElementById('joinNameSel').focus(); return; }
+  const fatigue=parseInt(document.getElementById('fatigueSlider').value);
+  const injury=document.getElementById('injuryInp').value.trim();
   if(!data.attendance)data.attendance={};
   if(!data.attendance[ds])data.attendance[ds]={};
   if(!data.attendance[ds][ev.id])data.attendance[ds][ev.id]=[];
   const arr=data.attendance[ds][ev.id];
-  if(arr.includes(currentUser)){
-    data.attendance[ds][ev.id]=arr.filter(n=>n!==currentUser);
-    showToast(lang==='ja'?`${dn(currentUser)} の参加を取り消しました`:`Cancelled attendance for ${currentUser}`);
-  } else {
-    // remove from absence if present
-    if(data.absence?.[ds]?.[ev.id]){
-      data.absence[ds][ev.id]=data.absence[ds][ev.id].filter(e=>absentName(e)!==currentUser);
-    }
-    arr.push(currentUser);
-    showToast(lang==='ja'?`✓ ${dn(currentUser)} の参加を記録しました`:`✓ Recorded attendance for ${currentUser}`);
+  // 既存エントリを削除（再登録）
+  const filtered=arr.filter(e=>(typeof e==='string'?e:e.name)!==name);
+  // 不参加を取り消し
+  if(data.absence?.[ds]?.[ev.id]){
+    data.absence[ds][ev.id]=data.absence[ds][ev.id].filter(e=>absentName(e)!==name);
   }
-  saveData();
-  closeModal('detailOv');
-  render();
+  filtered.push({name,fatigue,injury,ts:Date.now()});
+  data.attendance[ds][ev.id]=filtered;
+  closeModal('joinOv'); saveData(); render();
+  showToast(lang==='ja'?`✓ ${dn(name)} の参加を記録しました（疲労度: ${fatigue}）`:`✓ Recorded attendance for ${name} (fatigue: ${fatigue})`);
 }
 
 function openAbsentFromDetail(){
@@ -1458,6 +1700,17 @@ function openAbsentModal(ev,ds){
   const existEntry=alreadyAbsent?absents.find(e=>absentName(e)===currentUser):null;
   document.getElementById('absentTitle').textContent=alreadyAbsent?(lang==='ja'?'✗ 不参加を取り消す':'✗ Cancel Absence'):(lang==='ja'?'✗ 不参加を記録':'✗ Mark Absent');
   document.getElementById('absentSaveBtn').textContent=alreadyAbsent?(lang==='ja'?'不参加を取り消す':'Cancel Absence'):(lang==='ja'?'不参加を記録':'Mark Absent');
+  // i18n labels
+  const nlbl2=document.getElementById('t-absent-name-lbl');
+  if(nlbl2) nlbl2.textContent=lang==='ja'?'名前':'Name';
+  const rlbl=document.getElementById('t-absent-reason-lbl');
+  if(rlbl) rlbl.innerHTML=lang==='ja'
+    ? '理由 <span style="color:#ff6b6b;font-size:10px">（必須）</span>'
+    : 'Reason <span style="color:#ff6b6b;font-size:10px">(required)</span>';
+  const rta=document.getElementById('absentReason');
+  if(rta) rta.placeholder=lang==='ja'?'例：仕事、体調不良、遠征など':'e.g. Work, injury, travel…';
+  const nlbl=document.querySelector('#absentOv label');
+  if(nlbl&&nlbl.textContent.trim()==='名前'||nlbl?.textContent.trim()==='Name') nlbl.textContent=lang==='ja'?'名前':'Name';
   document.getElementById('absentSaveBtn').style.background=alreadyAbsent?'#555':'#7a1a1a';
   document.getElementById('absentReason').value=alreadyAbsent?absentReason(existEntry):'';
   document.getElementById('absentReason').readOnly=alreadyAbsent;
@@ -1473,7 +1726,16 @@ function saveAbsent(){
   const {ev,ds}=_pDetail;
   const name=document.getElementById('absentNameSel').value;
   const reason=document.getElementById('absentReason').value.trim();
+  const arr0=((data.absence||{})[ds]||{})[ev.id]||[];
+  const alreadyAbsent=name&&arr0.some(e=>absentName(e)===name);
   if(!name){document.getElementById('absentNameSel').focus();return;}
+  if(!alreadyAbsent && !reason){
+    const ta=document.getElementById('absentReason');
+    ta.style.borderColor='#ff6b6b'; ta.focus();
+    setTimeout(()=>ta.style.borderColor='',1500);
+    showToast(lang==='ja'?'理由を入力してください（必須）':'Please enter a reason (required)');
+    return;
+  }
   if(!data.absence)data.absence={};
   if(!data.absence[ds])data.absence[ds]={};
   if(!data.absence[ds][ev.id])data.absence[ds][ev.id]=[];
@@ -1684,7 +1946,7 @@ function renderAnalytics(){
     const total=events.length;
     const rows=names.map(name=>{
       let cnt=0;
-      events.forEach(ev=>{if((att[ev.date]?.[ev.id]||[]).includes(name))cnt++;});
+      events.forEach(ev=>{if((att[ev.date]?.[ev.id]||[]).some(e=>attName(e)===name))cnt++;});
       const pct=total>0?Math.round(cnt/total*100):0;
       return{name,cnt,pct};
     }).sort((a,b)=>b.cnt-a.cnt);
@@ -1706,11 +1968,11 @@ function renderAnalytics(){
 
   } else if(_amTab==='sessions'){
     const rows=events.map(ev=>{
-      const atts=((att[ev.date]||{})[ev.id])||[];
+      const attsR=((att[ev.date]||{})[ev.id])||[];
       const dt=new Date(ev.date+'T00:00:00');
-      const pC=atts.filter(n=>PLAYERS.includes(n)).length;
-      const fC=atts.filter(n=>FRONT_OFFICE.includes(n)).length;
-      return{ev,dt,atts,pC,fC};
+      const pC=attsR.filter(e=>PLAYERS.includes(attName(e))).length;
+      const fC=attsR.filter(e=>FRONT_OFFICE.includes(attName(e))).length;
+      return{ev,dt,atts:attsR,pC,fC};
     }).sort((a,b)=>a.ev.date.localeCompare(b.ev.date)||a.ev.start.localeCompare(b.ev.start));
     const avg=rows.length?Math.round(rows.reduce((s,r)=>s+r.pC,0)/rows.length*10)/10:0;
     let html=`<div class="am-grid">
@@ -1759,7 +2021,7 @@ function renderAnalytics(){
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function ovClose(e,id){ if(e.target===document.getElementById(id)) closeModal(id); }
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') ['evOv','detailOv','editOv','absentOv','confirmOv','boardOv','amOv'].forEach(id=>closeModal(id));
+  if(e.key==='Escape') ['evOv','detailOv','editOv','absentOv','joinOv','confirmOv','boardOv','amOv'].forEach(id=>closeModal(id));
 });
 document.addEventListener('click',e=>{
   const c=document.getElementById('acctContainer');
