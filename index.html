@@ -274,6 +274,9 @@ header {
 .fg select option { background:var(--surf2); }
 .time-row { display:flex; gap:8px; align-items:center; }
 .time-row span { color:var(--sub); font-size:11px; }
+.time-sel { flex:1; background:var(--surf3); border:1px solid var(--border); border-radius:var(--r); color:var(--text); padding:8px 10px; font-size:12px; outline:none; font-family:inherit; cursor:pointer; }
+.time-sel:focus { border-color:var(--gold2); }
+.time-sel option { background:var(--surf2); }
 .mfoot { display:flex; gap:8px; margin-top:18px; }
 .btn-cancel { flex:1; background:none; border:1px solid var(--border); color:var(--sub); padding:9px; border-radius:7px; font-size:12px; font-weight:700; }
 .btn-save   { flex:2; background:var(--gold); border:none; color:#0b0f18; padding:9px; border-radius:7px; font-size:12px; font-weight:700; }
@@ -538,14 +541,18 @@ header {
     <div class="fg">
       <label>開始・終了時刻</label>
       <div class="time-row">
-        <input type="time" id="evStart" step="1800">
+        <select id="evStart" class="time-sel"></select>
         <span>〜</span>
-        <input type="time" id="evEnd" step="1800">
+        <select id="evEnd" class="time-sel"></select>
       </div>
     </div>
     <div class="fg">
-      <label>メモ（任意）</label>
+      <label>メモ（全員に表示）</label>
       <input type="text" id="evMemo" placeholder="例：合宿、男女合同など">
+    </div>
+    <div class="fg" id="evPrivateFg">
+      <label style="display:flex;align-items:center;gap:6px">🔒 内部メモ <span style="font-size:9px;color:var(--muted);font-weight:400">（編集モードのみ表示）</span></label>
+      <input type="text" id="evPrivate" placeholder="例：Shibataに確認済み、施設費用など">
     </div>
     <div class="mfoot">
       <button class="btn-cancel" onclick="closeModal('evOv')" id="evCancelBtn">キャンセル</button>
@@ -1101,11 +1108,11 @@ function openEditEvent(ev, ds){
   document.getElementById('evOvTitle').textContent='✏️ 予約を編集';
   document.getElementById('evDelBtn').style.display='';
   buildFacSelect();
+  buildTimeSelects(ev.start.slice(0,5), ev.end.slice(0,5));
   document.getElementById('evFac').value=ev.facId;
   document.getElementById('evPurpose').value=ev.purpose;
-  document.getElementById('evStart').value=ev.start.slice(0,5);
-  document.getElementById('evEnd').value=ev.end.slice(0,5);
   document.getElementById('evMemo').value=ev.memo||'';
+  document.getElementById('evPrivate').value=ev.privateNote||'';
   document.getElementById('evOv').classList.add('open');
 }
 
@@ -1120,6 +1127,26 @@ function buildFacSelect(){
   });
 }
 
+function buildTimeSelects(startVal, endVal) {
+  const startSel = document.getElementById('evStart');
+  const endSel   = document.getElementById('evEnd');
+  startSel.innerHTML = '';
+  endSel.innerHTML   = '';
+  for (let h = 6; h <= 24; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      if (h === 24 && m > 0) break;
+      const timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      const label   = `${h}:${String(m).padStart(2,'0')}`;
+      const os = document.createElement('option'); os.value = timeStr; os.textContent = label;
+      const oe = document.createElement('option'); oe.value = timeStr; oe.textContent = label;
+      startSel.appendChild(os);
+      endSel.appendChild(oe);
+    }
+  }
+  if (startVal) startSel.value = startVal;
+  if (endVal)   endSel.value   = endVal;
+}
+
 function saveEvent(){
   const ds=_pEvt.ds;
   const facId=document.getElementById('evFac').value;
@@ -1127,10 +1154,11 @@ function saveEvent(){
   const start=document.getElementById('evStart').value;
   const end=document.getElementById('evEnd').value;
   const memo=document.getElementById('evMemo').value.trim();
+  const privateNote=document.getElementById('evPrivate').value.trim();
   if(!start||!end||start>=end){showToast('時刻を正しく入力してください');return;}
   if(!data.events) data.events={};
   const id=_pEvt.id||genId();
-  data.events[id]={date:ds,facId,purpose,start,end,memo};
+  data.events[id]={date:ds,facId,purpose,start,end,memo,privateNote};
   closeModal('evOv');saveData();render();showToast('保存しました');
 }
 
@@ -1183,6 +1211,7 @@ function openDetail(ev, ds){
 
   let html=`<div class="dm-row"><div class="dm-lbl">${lang==='ja'?'施設':'Venue'}</div><div class="dm-val" style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:${fac.bg};color:${fac.fg};border-left:3px solid ${fac.bd}">${facName(ev.facId)}</span></div></div>`;
   if(ev.memo) html+=`<div class="dm-row"><div class="dm-lbl">${lang==='ja'?'メモ':'Notes'}</div><div class="dm-val">${escHtml(ev.memo)}</div></div>`;
+  if(ev.privateNote && isEdit) html+=`<div class="dm-row"><div class="dm-lbl" style="color:#ffd700">🔒 ${lang==='ja'?'内部':'Internal'}</div><div class="dm-val" style="color:#ffd700;opacity:.85">${escHtml(ev.privateNote)}</div></div>`;
 
   // Attendance
   html+=`<div class="dm-row"><div class="dm-lbl">${lang==='ja'?'参加':'Join'}</div><div class="dm-val"><div class="att-list">`;
